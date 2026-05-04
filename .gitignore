@@ -1,0 +1,30 @@
+# Java build output
+out/
+bin/
+build/
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE and editor files
+.idea/
+.vscode/
+.vs/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Local project memory
+CONTEXT.md
