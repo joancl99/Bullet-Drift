@@ -10,6 +10,8 @@ import java.util.Random;
 public class GameManager extends JPanel {
     private static final long SHIELD_DURATION_MS = 5000;
     private static final long RAPID_FIRE_DURATION_MS = 5000;
+    private static final long DAMAGE_INVULNERABILITY_MS = 1000;
+    private static final int POWER_UP_TOP_MARGIN = 220;
 
     private Player player;
     private ArrayList<Enemy> enemies;
@@ -18,6 +20,8 @@ public class GameManager extends JPanel {
     private Random rand;
     private boolean gameOver;
     private boolean debugHitboxes;
+    private boolean paused;
+    private boolean firing;
     private Image backgroundImage;
 
     public GameManager() {
@@ -35,6 +39,8 @@ public class GameManager extends JPanel {
         score = 0;
         gameOver = false;
         debugHitboxes = false;
+        paused = false;
+        firing = false;
         backgroundImage = new ImageIcon("Images/fondo1.png").getImage();
 
         // Añadimos un powerup inicial en el centro (ejemplo)
@@ -44,17 +50,37 @@ public class GameManager extends JPanel {
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                player.getKeyAdapter().keyPressed(e);
-                if (e.getKeyCode() == KeyEvent.VK_F1) {
+                int keyCode = e.getKeyCode();
+
+                if (keyCode == KeyEvent.VK_F1) {
                     debugHitboxes = !debugHitboxes;
                 }
-                if (e.getKeyCode() == KeyEvent.VK_ENTER && gameOver) {
+
+                if (keyCode == KeyEvent.VK_ENTER && gameOver) {
                     resetGame();
+                    return;
                 }
+
+                if (keyCode == KeyEvent.VK_ESCAPE && !gameOver) {
+                    togglePause();
+                    return;
+                }
+
+                if (paused) {
+                    if (keyCode == KeyEvent.VK_ENTER) {
+                        setPaused(false);
+                    } else if (keyCode == KeyEvent.VK_Q) {
+                        System.exit(0);
+                    }
+                    return;
+                }
+
+                player.getKeyAdapter().keyPressed(e);
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
+                if (paused) return;
                 player.getKeyAdapter().keyReleased(e);
             }
         });
@@ -63,15 +89,31 @@ public class GameManager extends JPanel {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (paused) {
+                    handlePauseClick(e.getPoint());
+                    return;
+                }
+
                 if (SwingUtilities.isLeftMouseButton(e)) {
+                    firing = true;
                     player.shoot();
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    firing = false;
                 }
             }
         });
 
         // Timer principal
         Timer gameTimer = new Timer(20, e -> {
-            if (!gameOver) {
+            if (!gameOver && !paused) {
+                if (firing) {
+                    player.shoot();
+                }
                 generateEnemies();
                 generatePowerUps(); // 👈 nuevo generador de powerups
                 moveEnemies();
@@ -94,9 +136,12 @@ public class GameManager extends JPanel {
 
     // 👇 Nuevo: generación aleatoria de powerups
     private void generatePowerUps() {
+        if (getWidth() <= 50 || getHeight() <= POWER_UP_TOP_MARGIN + 50) return;
+
         if (powerUps.size() < 3 && rand.nextInt(500) == 0) { // probabilidad baja
             int x = rand.nextInt(getWidth() - 50);
-            int y = rand.nextInt(getHeight() - 50);
+            int availableHeight = Math.max(1, getHeight() - POWER_UP_TOP_MARGIN - 50);
+            int y = POWER_UP_TOP_MARGIN + rand.nextInt(availableHeight);
 
             // elegir un tipo aleatorio
             String[] tipos = {"vida", "escudo", "disparoRapido"};
@@ -121,6 +166,10 @@ public class GameManager extends JPanel {
         while (enemyIterator.hasNext()) {
             Enemy enemy = enemyIterator.next();
             if (playerHitbox.intersects(enemy.getHitBoxEnemy())) {
+                if (player.isInvulnerable()) {
+                    continue;
+                }
+
                 enemyIterator.remove();
 
                 if (player.hasShield()) {
@@ -129,6 +178,7 @@ public class GameManager extends JPanel {
                 }
 
                 player.loseLife(1);
+                player.activateInvulnerability(DAMAGE_INVULNERABILITY_MS);
                 if (player.getLives() <= 0) {
                     gameOver = true;
                     repaint();
@@ -213,6 +263,10 @@ public class GameManager extends JPanel {
             drawHitboxes(g);
         }
 
+        if (paused) {
+            drawPauseMenu(g);
+        }
+
         if (gameOver) {
             g.setFont(new Font("Arial", Font.BOLD, 30));
             g.drawString("¡Has perdido!", getWidth() / 2 - 150, getHeight() / 2 - 50);
@@ -250,12 +304,72 @@ public class GameManager extends JPanel {
         g2d.setStroke(previousStroke);
     }
 
+    private void togglePause() {
+        setPaused(!paused);
+    }
+
+    private void setPaused(boolean paused) {
+        this.paused = paused;
+        firing = false;
+        if (paused) {
+            player.clearMovementInput();
+        }
+        repaint();
+    }
+
+    private void handlePauseClick(Point point) {
+        if (getResumeButtonBounds().contains(point)) {
+            setPaused(false);
+        } else if (getExitButtonBounds().contains(point)) {
+            System.exit(0);
+        }
+    }
+
+    private Rectangle getResumeButtonBounds() {
+        return new Rectangle(getWidth() / 2 - 150, getHeight() / 2 - 10, 300, 60);
+    }
+
+    private Rectangle getExitButtonBounds() {
+        return new Rectangle(getWidth() / 2 - 150, getHeight() / 2 + 70, 300, 60);
+    }
+
+    private void drawPauseMenu(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(new Color(0, 0, 0, 170));
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 56));
+        g2d.drawString("PAUSA", getWidth() / 2 - 95, getHeight() / 2 - 90);
+
+        drawMenuButton(g2d, getResumeButtonBounds(), "Reanudar");
+        drawMenuButton(g2d, getExitButtonBounds(), "Salir");
+
+        g2d.setFont(new Font("Arial", Font.BOLD, 22));
+        g2d.drawString("ESC/ENTER: reanudar   Q: salir", getWidth() / 2 - 170, getHeight() / 2 + 170);
+    }
+
+    private void drawMenuButton(Graphics2D g2d, Rectangle bounds, String text) {
+        g2d.setColor(new Color(40, 40, 40, 220));
+        g2d.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        g2d.setColor(Color.WHITE);
+        g2d.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        g2d.setFont(new Font("Arial", Font.BOLD, 30));
+
+        FontMetrics metrics = g2d.getFontMetrics();
+        int textX = bounds.x + (bounds.width - metrics.stringWidth(text)) / 2;
+        int textY = bounds.y + ((bounds.height - metrics.getHeight()) / 2) + metrics.getAscent();
+        g2d.drawString(text, textX, textY);
+    }
+
     public void resetGame() {
         score = 0;
         enemies.clear();
         powerUps.clear(); // 👈 limpiar también los powerups
         player.resetState();
         gameOver = false;
+        paused = false;
+        firing = false;
         repaint();
     }
 }

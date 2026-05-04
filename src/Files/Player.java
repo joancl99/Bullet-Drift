@@ -12,6 +12,8 @@ public class Player extends JPanel {
     private final int PLAYERWIDTH = 25;
     private final int PLAYERHEIGHT = 35;
     private final int INITIAL_LIVES = 3;
+    private final int NORMAL_SHOOT_COOLDOWN_MS = 550;
+    private final int RAPID_SHOOT_COOLDOWN_MS = 80;
 
     private int x, y;
     private boolean facingLeft, facingRight, facingUp, facingDown;
@@ -30,8 +32,10 @@ public class Player extends JPanel {
     private int lives;
     private boolean rapidFire;
     private boolean shieldActive;
+    private boolean invulnerable;
     private long rapidFireEndTime;
     private long shieldEndTime;
+    private long invulnerabilityEndTime;
 
     public Player(int panelWidth, int panelHeight) {
         this.panelWidth = panelWidth;
@@ -50,7 +54,7 @@ public class Player extends JPanel {
         movementTimer.start();
 
         canShoot = true;
-        shootCooldownTimer = new Timer(325, e -> canShoot = true);
+        shootCooldownTimer = new Timer(NORMAL_SHOOT_COOLDOWN_MS, e -> canShoot = true);
 
         // 👇 inicializamos powerups
         lives = INITIAL_LIVES;
@@ -83,20 +87,25 @@ public class Player extends JPanel {
         int centerX = x + width / 2;
         int centerY = y + height / 2;
 
-        if (facingLeft) {
-            g2d.rotate(Math.toRadians(180), centerX, centerY);
-            g2d.drawImage(playerImage, x, y, width, height, this);
-            g2d.rotate(-Math.toRadians(180), centerX, centerY);
-        } else if (facingRight) {
-            g2d.drawImage(playerImage, x, y, width, height, this);
-        } else if (facingUp) {
-            g2d.rotate(Math.toRadians(270), centerX, centerY);
-            g2d.drawImage(playerImage, x, y, width, height, this);
-            g2d.rotate(-Math.toRadians(270), centerX, centerY);
-        } else if (facingDown) {
-            g2d.rotate(Math.toRadians(90), centerX, centerY);
-            g2d.drawImage(playerImage, x, y, width, height, this);
-            g2d.rotate(-Math.toRadians(90), centerX, centerY);
+        boolean shouldDrawPlayer = !invulnerable || (System.currentTimeMillis() / 100) % 2 == 0;
+        if (shouldDrawPlayer) {
+            if (facingLeft) {
+                g2d.rotate(Math.toRadians(180), centerX, centerY);
+                g2d.drawImage(playerImage, x, y, width, height, this);
+                g2d.rotate(-Math.toRadians(180), centerX, centerY);
+            } else if (facingRight) {
+                g2d.drawImage(playerImage, x, y, width, height, this);
+            } else if (facingUp) {
+                g2d.rotate(Math.toRadians(270), centerX, centerY);
+                g2d.drawImage(playerImage, x, y, width, height, this);
+                g2d.rotate(-Math.toRadians(270), centerX, centerY);
+            } else if (facingDown) {
+                g2d.rotate(Math.toRadians(90), centerX, centerY);
+                g2d.drawImage(playerImage, x, y, width, height, this);
+                g2d.rotate(-Math.toRadians(90), centerX, centerY);
+            } else {
+                g2d.drawImage(playerImage, x, y, width, height, this);
+            }
         }
 
         // Dibujar escudo si está activo
@@ -150,6 +159,10 @@ public class Player extends JPanel {
 
         if (rapidFire && System.currentTimeMillis() > rapidFireEndTime) {
             rapidFire = false;
+        }
+
+        if (invulnerable && System.currentTimeMillis() > invulnerabilityEndTime) {
+            invulnerable = false;
         }
 
         repaint();
@@ -207,7 +220,7 @@ public class Player extends JPanel {
         canShoot = false;
 
         // 👇 si rapidFire activo, cooldown más corto
-        shootCooldownTimer.setDelay(rapidFire ? 5 : 325);
+        shootCooldownTimer.setDelay(rapidFire ? RAPID_SHOOT_COOLDOWN_MS : NORMAL_SHOOT_COOLDOWN_MS);
         shootCooldownTimer.restart();
     }
 
@@ -241,6 +254,19 @@ public class Player extends JPanel {
 
     public void loseLife(int amount) {
         lives = Math.max(0, lives - amount);
+    }
+
+    public void activateInvulnerability(long durationMs) {
+        invulnerable = true;
+        invulnerabilityEndTime = System.currentTimeMillis() + durationMs;
+    }
+
+    public boolean isInvulnerable() {
+        return invulnerable;
+    }
+
+    public void clearMovementInput() {
+        pressedKeys.clear();
     }
 
     public void setRapidFire(boolean active) {
@@ -283,8 +309,10 @@ public class Player extends JPanel {
         lives = INITIAL_LIVES;
         rapidFire = false;
         shieldActive = false;
+        invulnerable = false;
         rapidFireEndTime = 0;
         shieldEndTime = 0;
+        invulnerabilityEndTime = 0;
         canShoot = true;
         projectiles.clear();
         pressedKeys.clear();
