@@ -43,7 +43,12 @@ public class PowerUps {
     }
 
     public Rectangle getHitBoxPowerUps() {
-        return new Rectangle(x, y, width, height);
+        int hitboxWidth = (int) (width * 0.70);
+        int hitboxHeight = (int) (height * 0.70);
+        int hitboxX = x + (width - hitboxWidth) / 2;
+        int hitboxY = y + (height - hitboxHeight) / 2;
+
+        return new Rectangle(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
     }
 
     public String getType() {

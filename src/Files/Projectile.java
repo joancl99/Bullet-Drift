@@ -52,7 +52,12 @@ public class Projectile {
     }
 
     public Rectangle getHitBox() {
-        return new Rectangle((int)x, (int)y, width, height);
+        int hitboxWidth = Math.max(8, (int) (width * 0.45));
+        int hitboxHeight = Math.max(8, (int) (height * 0.45));
+        int hitboxX = (int) x + (width - hitboxWidth) / 2;
+        int hitboxY = (int) y + (height - hitboxHeight) / 2;
+
+        return new Rectangle(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
     }
 
     public int getX() {

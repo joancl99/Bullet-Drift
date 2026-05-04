@@ -196,8 +196,13 @@ public class Player extends JPanel {
         };
     }
 
-    public Rectangle getHitBox() { 
-        return new Rectangle(x, y, width, height); 
+    public Rectangle getHitBox() {
+        int hitboxWidth = (int) (width * 0.58);
+        int hitboxHeight = (int) (height * 0.70);
+        int hitboxX = x + (width - hitboxWidth) / 2;
+        int hitboxY = y + (height - hitboxHeight) / 2;
+
+        return new Rectangle(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
     }
 
     public void shoot() {
@@ -303,6 +308,7 @@ public class Player extends JPanel {
 
     public void deactivateShield() {
         shieldActive = false;
+        invulnerable = false;
     }
 
     public void resetState() {

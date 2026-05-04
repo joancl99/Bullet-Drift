@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Enemy {
+    private static final int IMAGE_SIZE = 90;
+
     private int x, y, speed;
     private Image enemyImage;
 
@@ -20,19 +22,19 @@ public class Enemy {
 
     public void paint(Graphics g) {
     // Dibuja la imagen del enemigo
-    g.drawImage(enemyImage, x, y, 90, 90, null);
+    g.drawImage(enemyImage, x, y, IMAGE_SIZE, IMAGE_SIZE, null);
 
     // Dibuja el hitbox en rojo para depuración
 
     }
 
     public Rectangle getHitBoxEnemy() {
-    int hitboxWidth = 50;
-    int hitboxHeight = 65;
+    int hitboxWidth = 44;
+    int hitboxHeight = 58;
 
     // Ajusta la posición del hitbox dentro de la imagen
-    int hitboxX = x + (90 - hitboxWidth) / 2;  // centrado horizontalmente
-    int hitboxY = y + (90 - hitboxHeight) / 2; // centrado verticalmente
+    int hitboxX = x + (IMAGE_SIZE - hitboxWidth) / 2;  // centrado horizontalmente
+    int hitboxY = y + (IMAGE_SIZE - hitboxHeight) / 2; // centrado verticalmente
 
     return new Rectangle(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
 }

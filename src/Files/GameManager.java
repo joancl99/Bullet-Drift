@@ -12,6 +12,7 @@ public class GameManager extends JPanel {
     private static final long RAPID_FIRE_DURATION_MS = 5000;
     private static final long DAMAGE_INVULNERABILITY_MS = 1000;
     private static final int POWER_UP_TOP_MARGIN = 220;
+    private static final long POWER_UP_FEEDBACK_DURATION_MS = 1200;
 
     private Player player;
     private ArrayList<Enemy> enemies;
@@ -22,6 +23,9 @@ public class GameManager extends JPanel {
     private boolean debugHitboxes;
     private boolean paused;
     private boolean firing;
+    private String powerUpFeedbackText;
+    private Color powerUpFeedbackColor;
+    private long powerUpFeedbackEndTime;
     private Image backgroundImage;
 
     public GameManager() {
@@ -41,6 +45,9 @@ public class GameManager extends JPanel {
         debugHitboxes = false;
         paused = false;
         firing = false;
+        powerUpFeedbackText = "";
+        powerUpFeedbackColor = Color.WHITE;
+        powerUpFeedbackEndTime = 0;
         backgroundImage = new ImageIcon("Images/fondo1.png").getImage();
 
         // Añadimos un powerup inicial en el centro (ejemplo)
@@ -213,12 +220,15 @@ public class GameManager extends JPanel {
         switch (powerUp.getType()) {
             case "vida":
                 player.addLife(1);
+                showPowerUpFeedback("+1 VIDA", new Color(80, 255, 120));
                 break;
             case "escudo":
                 player.activateShield(SHIELD_DURATION_MS);
+                showPowerUpFeedback("ESCUDO", new Color(80, 220, 255));
                 break;
             case "disparoRapido":
                 player.activateRapidFire(RAPID_FIRE_DURATION_MS);
+                showPowerUpFeedback("DISPARO RAPIDO", new Color(255, 220, 80));
                 break;
             default:
                 System.out.println("PowerUp desconocido");
@@ -263,6 +273,8 @@ public class GameManager extends JPanel {
             drawHitboxes(g);
         }
 
+        drawPowerUpFeedback(g);
+
         if (paused) {
             drawPauseMenu(g);
         }
@@ -272,6 +284,27 @@ public class GameManager extends JPanel {
             g.drawString("¡Has perdido!", getWidth() / 2 - 150, getHeight() / 2 - 50);
             g.drawString("Presiona ENTER para reiniciar", getWidth() / 2 - 200, getHeight() / 2);
         }
+    }
+
+    private void showPowerUpFeedback(String text, Color color) {
+        powerUpFeedbackText = text;
+        powerUpFeedbackColor = color;
+        powerUpFeedbackEndTime = System.currentTimeMillis() + POWER_UP_FEEDBACK_DURATION_MS;
+    }
+
+    private void drawPowerUpFeedback(Graphics g) {
+        if (powerUpFeedbackText.isEmpty() || System.currentTimeMillis() > powerUpFeedbackEndTime) return;
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setFont(new Font("Arial", Font.BOLD, 42));
+        FontMetrics metrics = g2d.getFontMetrics();
+        int textX = (getWidth() - metrics.stringWidth(powerUpFeedbackText)) / 2;
+        int textY = 120;
+
+        g2d.setColor(new Color(0, 0, 0, 160));
+        g2d.drawString(powerUpFeedbackText, textX + 3, textY + 3);
+        g2d.setColor(powerUpFeedbackColor);
+        g2d.drawString(powerUpFeedbackText, textX, textY);
     }
 
     private void drawHitboxes(Graphics g) {
@@ -370,6 +403,8 @@ public class GameManager extends JPanel {
         gameOver = false;
         paused = false;
         firing = false;
+        powerUpFeedbackText = "";
+        powerUpFeedbackEndTime = 0;
         repaint();
     }
 }
