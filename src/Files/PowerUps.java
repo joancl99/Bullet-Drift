@@ -7,6 +7,8 @@ public class PowerUps {
     private static final int WIDTH = 55;
     private static final int HEIGHT = 60;
     private static final double HITBOX_SCALE = 0.70;
+    private static final int REFERENCE_PANEL_WIDTH = 1920;
+    private static final int REFERENCE_PANEL_HEIGHT = 1080;
 
     private int x, y;
     private Image powerUpImage;
@@ -32,23 +34,47 @@ public class PowerUps {
         }
     }
 
-    public void paint(Graphics g, boolean debug) {
-        g.drawImage(powerUpImage, x, y, WIDTH, HEIGHT, null);
+    public void paint(Graphics g, boolean debug, int panelWidth, int panelHeight) {
+        double scale = getPanelScale(panelWidth, panelHeight);
+        int width = getScaledSize(WIDTH, scale);
+        int height = getScaledSize(HEIGHT, scale);
+        g.drawImage(powerUpImage, x, y, width, height, null);
 
         if (debug) {
             g.setColor(Color.RED);
-            Rectangle hitBox = getHitBoxPowerUps();
+            Rectangle hitBox = getHitBoxPowerUps(panelWidth, panelHeight);
             g.drawRect(hitBox.x, hitBox.y, hitBox.width, hitBox.height);
         }
     }
 
-    public Rectangle getHitBoxPowerUps() {
-        int hitboxWidth = (int) (WIDTH * HITBOX_SCALE);
-        int hitboxHeight = (int) (HEIGHT * HITBOX_SCALE);
-        int hitboxX = x + (WIDTH - hitboxWidth) / 2;
-        int hitboxY = y + (HEIGHT - hitboxHeight) / 2;
+    public void paint(Graphics g, boolean debug) {
+        paint(g, debug, REFERENCE_PANEL_WIDTH, REFERENCE_PANEL_HEIGHT);
+    }
+
+    public Rectangle getHitBoxPowerUps(int panelWidth, int panelHeight) {
+        double scale = getPanelScale(panelWidth, panelHeight);
+        int width = getScaledSize(WIDTH, scale);
+        int height = getScaledSize(HEIGHT, scale);
+        int hitboxWidth = (int) (width * HITBOX_SCALE);
+        int hitboxHeight = (int) (height * HITBOX_SCALE);
+        int hitboxX = x + (width - hitboxWidth) / 2;
+        int hitboxY = y + (height - hitboxHeight) / 2;
 
         return new Rectangle(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
+    }
+
+    public Rectangle getHitBoxPowerUps() {
+        return getHitBoxPowerUps(REFERENCE_PANEL_WIDTH, REFERENCE_PANEL_HEIGHT);
+    }
+
+    private double getPanelScale(int panelWidth, int panelHeight) {
+        double scaleX = panelWidth / (double) REFERENCE_PANEL_WIDTH;
+        double scaleY = panelHeight / (double) REFERENCE_PANEL_HEIGHT;
+        return Math.max(0.1, Math.min(scaleX, scaleY));
+    }
+
+    private int getScaledSize(int baseSize, double scale) {
+        return Math.max(1, (int) Math.round(baseSize * scale));
     }
 
     public String getType() {

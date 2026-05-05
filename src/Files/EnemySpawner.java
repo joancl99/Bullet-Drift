@@ -20,6 +20,11 @@ public class EnemySpawner {
     private static final int FAST_ENEMY_CHANCE_PER_WAVE_PERCENT = 8;
     private static final int FAST_ENEMY_MAX_CHANCE_PERCENT = 65;
     private static final int FAST_ENEMY_SPEED_BONUS = 4;
+    private static final int TANK_ENEMY_START_WAVE = 4;
+    private static final int TANK_ENEMY_BASE_CHANCE_PERCENT = 12;
+    private static final int TANK_ENEMY_CHANCE_PER_WAVE_PERCENT = 5;
+    private static final int TANK_ENEMY_MAX_CHANCE_PERCENT = 35;
+    private static final int TANK_ENEMY_SPEED_PENALTY = 3;
 
     private Random rand;
 
@@ -39,6 +44,8 @@ public class EnemySpawner {
         Enemy.Type enemyType = getEnemyType(wave);
         if (enemyType == Enemy.Type.FAST) {
             speed = Math.min(MAX_ENEMY_SPEED_LIMIT, speed + FAST_ENEMY_SPEED_BONUS);
+        } else if (enemyType == Enemy.Type.TANK) {
+            speed = Math.max(1, speed - TANK_ENEMY_SPEED_PENALTY);
         }
 
         enemies.add(new Enemy(x, ENEMY_START_Y, speed, enemyType));
@@ -60,6 +67,14 @@ public class EnemySpawner {
 
     private Enemy.Type getEnemyType(int wave) {
         if (wave < FAST_ENEMY_START_WAVE) return Enemy.Type.NORMAL;
+
+        if (wave >= TANK_ENEMY_START_WAVE) {
+            int tankChance = Math.min(
+                TANK_ENEMY_MAX_CHANCE_PERCENT,
+                TANK_ENEMY_BASE_CHANCE_PERCENT + (wave - TANK_ENEMY_START_WAVE) * TANK_ENEMY_CHANCE_PER_WAVE_PERCENT
+            );
+            if (rand.nextInt(100) < tankChance) return Enemy.Type.TANK;
+        }
 
         int fastChance = Math.min(
             FAST_ENEMY_MAX_CHANCE_PERCENT,

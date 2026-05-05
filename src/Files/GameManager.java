@@ -8,8 +8,11 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class GameManager extends JPanel {
-    private static final int PANEL_WIDTH = 1920;
-    private static final int PANEL_HEIGHT = 1080;
+    private static final int DESIGN_WIDTH = 1920;
+    private static final int DESIGN_HEIGHT = 1080;
+    private static final int MIN_PANEL_WIDTH = 960;
+    private static final int MIN_PANEL_HEIGHT = 540;
+    private static final double INITIAL_SCREEN_USAGE = 0.90;
     private static final int GAME_TIMER_DELAY_MS = 20;
     private static final int POINTS_PER_WAVE = 100;
     private static final int MAX_POWER_UPS = 3;
@@ -59,11 +62,13 @@ public class GameManager extends JPanel {
     private Image backgroundImage;
 
     public GameManager() {
-        this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
+        Dimension initialPanelSize = getInitialPanelSize();
+        this.setPreferredSize(initialPanelSize);
+        this.setMinimumSize(new Dimension(MIN_PANEL_WIDTH, MIN_PANEL_HEIGHT));
         this.setFocusable(true);
 
-        int panelWidth = this.getPreferredSize().width;
-        int panelHeight = this.getPreferredSize().height;
+        int panelWidth = initialPanelSize.width;
+        int panelHeight = initialPanelSize.height;
 
         player = new Player(panelWidth, panelHeight);
         enemies = new ArrayList<>();
@@ -84,6 +89,13 @@ public class GameManager extends JPanel {
         backgroundImage = new ImageIcon("Images/fondo1.png").getImage();
 
         powerUps.add(new PowerUps(180, 330, POWER_UP_RAPID_FIRE));
+
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                player.setPanelSize(getWidth(), getHeight());
+            }
+        });
 
         this.addKeyListener(new KeyAdapter() {
             @Override
@@ -161,6 +173,24 @@ public class GameManager extends JPanel {
         gameTimer.start();
     }
 
+    private Dimension getInitialPanelSize() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int availableWidth = (int) (screenSize.width * INITIAL_SCREEN_USAGE);
+        int availableHeight = (int) (screenSize.height * INITIAL_SCREEN_USAGE);
+        double targetAspectRatio = DESIGN_WIDTH / (double) DESIGN_HEIGHT;
+
+        int width = Math.min(DESIGN_WIDTH, availableWidth);
+        int height = (int) (width / targetAspectRatio);
+        if (height > availableHeight) {
+            height = Math.min(DESIGN_HEIGHT, availableHeight);
+            width = (int) (height * targetAspectRatio);
+        }
+
+        width = Math.max(MIN_PANEL_WIDTH, width);
+        height = Math.max(MIN_PANEL_HEIGHT, height);
+        return new Dimension(width, height);
+    }
+
     private void generateEnemies() {
         enemySpawner.generateEnemy(enemies, getWidth(), getWave());
     }
@@ -197,7 +227,7 @@ public class GameManager extends JPanel {
         Iterator<Enemy> enemyIterator = enemies.iterator();
         while (enemyIterator.hasNext()) {
             Enemy enemy = enemyIterator.next();
-            if (playerHitbox.intersects(enemy.getHitBoxEnemy())) {
+            if (playerHitbox.intersects(enemy.getHitBoxEnemy(getWidth(), getHeight()))) {
                 if (player.isInvulnerable()) {
                     continue;
                 }
@@ -222,11 +252,13 @@ public class GameManager extends JPanel {
             }
 
             for (Projectile projectile : new ArrayList<>(player.projectiles)) {
-                if (projectile.getHitBox().intersects(enemy.getHitBoxEnemy())) {
-                    enemyIterator.remove();
+                if (projectile.getHitBox().intersects(enemy.getHitBoxEnemy(getWidth(), getHeight()))) {
                     player.projectiles.remove(projectile);
-                    score += SCORE_PER_ENEMY;
-                    updateWaveFeedback();
+                    if (enemy.takeHit()) {
+                        enemyIterator.remove();
+                        score += SCORE_PER_ENEMY;
+                        updateWaveFeedback();
+                    }
                     break;
                 }
             }
@@ -235,7 +267,7 @@ public class GameManager extends JPanel {
         Iterator<PowerUps> powerUpIterator = powerUps.iterator();
         while (powerUpIterator.hasNext()) {
             PowerUps powerUp = powerUpIterator.next();
-            if (playerHitbox.intersects(powerUp.getHitBoxPowerUps())) {
+            if (playerHitbox.intersects(powerUp.getHitBoxPowerUps(getWidth(), getHeight()))) {
                 aplicarPowerUp(powerUp);
                 powerUpIterator.remove();
             }
@@ -297,11 +329,11 @@ public class GameManager extends JPanel {
 
 
         for (Enemy enemy : enemies) {
-            enemy.paint(g);
+            enemy.paint(g, getWidth(), getHeight());
         }
 
         for (PowerUps powerUp : powerUps) {
-            powerUp.paint(g, false);
+            powerUp.paint(g, false, getWidth(), getHeight());
         }
 
 
@@ -431,7 +463,7 @@ public class GameManager extends JPanel {
 
         g2d.setColor(Color.RED);
         for (Enemy enemy : enemies) {
-            Rectangle enemyHitbox = enemy.getHitBoxEnemy();
+            Rectangle enemyHitbox = enemy.getHitBoxEnemy(getWidth(), getHeight());
             g2d.drawRect(enemyHitbox.x, enemyHitbox.y, enemyHitbox.width, enemyHitbox.height);
         }
 
@@ -443,7 +475,7 @@ public class GameManager extends JPanel {
 
         g2d.setColor(Color.CYAN);
         for (PowerUps powerUp : powerUps) {
-            Rectangle powerUpHitbox = powerUp.getHitBoxPowerUps();
+            Rectangle powerUpHitbox = powerUp.getHitBoxPowerUps(getWidth(), getHeight());
             g2d.drawRect(powerUpHitbox.x, powerUpHitbox.y, powerUpHitbox.width, powerUpHitbox.height);
         }
 

@@ -11,10 +11,10 @@ public class Main {
             GameManager gamePanel = new GameManager();
             
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setResizable(false);
+            frame.setResizable(true);
             frame.add(gamePanel);
-            frame.pack(); // Ajusta el tamaño al preferido del panel
-            frame.setLocationRelativeTo(null); // Centra la ventana
+            frame.pack();
+            frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         });
     }
