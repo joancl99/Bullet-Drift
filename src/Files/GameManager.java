@@ -8,15 +8,37 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class GameManager extends JPanel {
+    private static final int PANEL_WIDTH = 1920;
+    private static final int PANEL_HEIGHT = 1080;
+    private static final int GAME_TIMER_DELAY_MS = 20;
+    private static final int MAX_ENEMIES = 20;
+    private static final int ENEMY_SPAWN_MARGIN = 50;
+    private static final int ENEMY_START_Y = -50;
+    private static final int MIN_ENEMY_SPEED = 2;
+    private static final int ENEMY_SPEED_VARIATION = 7;
+    private static final int MAX_POWER_UPS = 3;
+    private static final int POWER_UP_SPAWN_CHANCE = 500;
+    private static final int POWER_UP_SPAWN_MARGIN = 50;
+    private static final int SCORE_PER_ENEMY = 10;
+    private static final String POWER_UP_LIFE = "vida";
+    private static final String POWER_UP_SHIELD = "escudo";
+    private static final String POWER_UP_RAPID_FIRE = "disparoRapido";
     private static final long SHIELD_DURATION_MS = 5000;
     private static final long RAPID_FIRE_DURATION_MS = 5000;
     private static final long DAMAGE_INVULNERABILITY_MS = 1000;
     private static final int POWER_UP_TOP_MARGIN = 220;
     private static final long POWER_UP_FEEDBACK_DURATION_MS = 1200;
+    private static final int HUD_X = 40;
+    private static final int HUD_SCORE_Y = 150;
+    private static final int HUD_LIVES_Y = 200;
+    private static final int HUD_POWER_UP_Y = 250;
+    private static final int HUD_LINE_HEIGHT = 40;
+    private static final int PAUSE_BUTTON_WIDTH = 300;
+    private static final int PAUSE_BUTTON_HEIGHT = 60;
 
     private Player player;
     private ArrayList<Enemy> enemies;
-    private ArrayList<PowerUps> powerUps; // 👈 ahora es una lista
+    private ArrayList<PowerUps> powerUps;
     private int score;
     private Random rand;
     private boolean gameOver;
@@ -29,16 +51,15 @@ public class GameManager extends JPanel {
     private Image backgroundImage;
 
     public GameManager() {
-        this.setPreferredSize(new Dimension(1920, 1080));
+        this.setPreferredSize(new Dimension(PANEL_WIDTH, PANEL_HEIGHT));
         this.setFocusable(true);
 
         int panelWidth = this.getPreferredSize().width;
         int panelHeight = this.getPreferredSize().height;
 
-        // Crear player
         player = new Player(panelWidth, panelHeight);
         enemies = new ArrayList<>();
-        powerUps = new ArrayList<>(); // 👈 inicializamos lista
+        powerUps = new ArrayList<>();
         rand = new Random();
         score = 0;
         gameOver = false;
@@ -50,10 +71,8 @@ public class GameManager extends JPanel {
         powerUpFeedbackEndTime = 0;
         backgroundImage = new ImageIcon("Images/fondo1.png").getImage();
 
-        // Añadimos un powerup inicial en el centro (ejemplo)
-        powerUps.add(new PowerUps(180,330, "disparoRapido"));
+        powerUps.add(new PowerUps(180, 330, POWER_UP_RAPID_FIRE));
 
-        // KeyListener delegado al player
         this.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -92,7 +111,6 @@ public class GameManager extends JPanel {
             }
         });
 
-        // **MouseListener para disparar**
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -115,16 +133,15 @@ public class GameManager extends JPanel {
             }
         });
 
-        // Timer principal
-        Timer gameTimer = new Timer(20, e -> {
+        Timer gameTimer = new Timer(GAME_TIMER_DELAY_MS, e -> {
             if (!gameOver && !paused) {
                 if (firing) {
                     player.shoot();
                 }
                 generateEnemies();
-                generatePowerUps(); // 👈 nuevo generador de powerups
+                generatePowerUps();
                 moveEnemies();
-                player.updateProjectiles(getWidth(), getHeight()); // límites dinámicos
+                player.updateProjectiles(getWidth(), getHeight());
                 checkCollisions();
                 repaint();
             }
@@ -133,25 +150,25 @@ public class GameManager extends JPanel {
     }
 
     private void generateEnemies() {
-        if (enemies.size() < 20) {
-            int x = rand.nextInt(getWidth() - 50);
-            int y = -50;
-            int speed = rand.nextInt(7) + 2;
+        if (getWidth() <= ENEMY_SPAWN_MARGIN) return;
+
+        if (enemies.size() < MAX_ENEMIES) {
+            int x = rand.nextInt(getWidth() - ENEMY_SPAWN_MARGIN);
+            int y = ENEMY_START_Y;
+            int speed = rand.nextInt(ENEMY_SPEED_VARIATION) + MIN_ENEMY_SPEED;
             enemies.add(new Enemy(x, y, speed));
         }
     }
 
-    // 👇 Nuevo: generación aleatoria de powerups
     private void generatePowerUps() {
-        if (getWidth() <= 50 || getHeight() <= POWER_UP_TOP_MARGIN + 50) return;
+        if (getWidth() <= POWER_UP_SPAWN_MARGIN || getHeight() <= POWER_UP_TOP_MARGIN + POWER_UP_SPAWN_MARGIN) return;
 
-        if (powerUps.size() < 3 && rand.nextInt(500) == 0) { // probabilidad baja
-            int x = rand.nextInt(getWidth() - 50);
-            int availableHeight = Math.max(1, getHeight() - POWER_UP_TOP_MARGIN - 50);
+        if (powerUps.size() < MAX_POWER_UPS && rand.nextInt(POWER_UP_SPAWN_CHANCE) == 0) {
+            int x = rand.nextInt(getWidth() - POWER_UP_SPAWN_MARGIN);
+            int availableHeight = Math.max(1, getHeight() - POWER_UP_TOP_MARGIN - POWER_UP_SPAWN_MARGIN);
             int y = POWER_UP_TOP_MARGIN + rand.nextInt(availableHeight);
 
-            // elegir un tipo aleatorio
-            String[] tipos = {"vida", "escudo", "disparoRapido"};
+            String[] tipos = {POWER_UP_LIFE, POWER_UP_SHIELD, POWER_UP_RAPID_FIRE};
             String tipo = tipos[rand.nextInt(tipos.length)];
 
             powerUps.add(new PowerUps(x, y, tipo));
@@ -160,7 +177,7 @@ public class GameManager extends JPanel {
 
     private void moveEnemies() {
         for (Enemy enemy : enemies) {
-            enemy.moveDownEnemy(getHeight()); // límite dinámico
+            enemy.moveDownEnemy(getHeight());
         }
         enemies.removeIf(e -> e.getY() > getHeight());
     }
@@ -168,7 +185,6 @@ public class GameManager extends JPanel {
     private void checkCollisions() {
         Rectangle playerHitbox = player.getHitBox();
 
-        // --- Colisiones con enemigos ---
         Iterator<Enemy> enemyIterator = enemies.iterator();
         while (enemyIterator.hasNext()) {
             Enemy enemy = enemyIterator.next();
@@ -199,13 +215,12 @@ public class GameManager extends JPanel {
                 if (projectile.getHitBox().intersects(enemy.getHitBoxEnemy())) {
                     enemyIterator.remove();
                     player.projectiles.remove(projectile);
-                    score += 10;
+                    score += SCORE_PER_ENEMY;
                     break;
                 }
             }
         }
 
-        // --- Colisiones con powerups ---
         Iterator<PowerUps> powerUpIterator = powerUps.iterator();
         while (powerUpIterator.hasNext()) {
             PowerUps powerUp = powerUpIterator.next();
@@ -218,15 +233,15 @@ public class GameManager extends JPanel {
 
     private void aplicarPowerUp(PowerUps powerUp) {
         switch (powerUp.getType()) {
-            case "vida":
+            case POWER_UP_LIFE:
                 player.addLife(1);
                 showPowerUpFeedback("+1 VIDA", new Color(80, 255, 120));
                 break;
-            case "escudo":
+            case POWER_UP_SHIELD:
                 player.activateShield(SHIELD_DURATION_MS);
                 showPowerUpFeedback("ESCUDO", new Color(80, 220, 255));
                 break;
-            case "disparoRapido":
+            case POWER_UP_RAPID_FIRE:
                 player.activateRapidFire(RAPID_FIRE_DURATION_MS);
                 showPowerUpFeedback("DISPARO RAPIDO", new Color(255, 220, 80));
                 break;
@@ -247,29 +262,28 @@ public class GameManager extends JPanel {
             enemy.paint(g);
         }
 
-          // pintar powerups
         for (PowerUps powerUp : powerUps) {
-            powerUp.paint(g, false); // false = no debug
+            powerUp.paint(g, false);
         }
 
 
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 40));
-        g.drawString("Puntos: " + score, 40, 150);
-        g.drawString("Vidas: " + player.getLives(), 40, 200);
+        g.drawString("Puntos: " + score, HUD_X, HUD_SCORE_Y);
+        g.drawString("Vidas: " + player.getLives(), HUD_X, HUD_LIVES_Y);
 
         g.setFont(new Font("Arial", Font.BOLD, 28));
-        int powerUpTextY = 250;
+        int powerUpTextY = HUD_POWER_UP_Y;
         if (player.hasShield()) {
-            g.drawString("Escudo: " + player.getShieldSecondsLeft() + "s", 40, powerUpTextY);
-            powerUpTextY += 40;
+            g.drawString("Escudo: " + player.getShieldSecondsLeft() + "s", HUD_X, powerUpTextY);
+            powerUpTextY += HUD_LINE_HEIGHT;
         }
         if (player.isRapidFire()) {
-            g.drawString("Disparo rapido: " + player.getRapidFireSecondsLeft() + "s", 40, powerUpTextY);
+            g.drawString("Disparo rapido: " + player.getRapidFireSecondsLeft() + "s", HUD_X, powerUpTextY);
         }
 
         if (debugHitboxes) {
-            g.drawString("Hitboxes: ON", 40, getHeight() - 40);
+            g.drawString("Hitboxes: ON", HUD_X, getHeight() - HUD_LINE_HEIGHT);
             drawHitboxes(g);
         }
 
@@ -359,11 +373,11 @@ public class GameManager extends JPanel {
     }
 
     private Rectangle getResumeButtonBounds() {
-        return new Rectangle(getWidth() / 2 - 150, getHeight() / 2 - 10, 300, 60);
+        return new Rectangle(getWidth() / 2 - PAUSE_BUTTON_WIDTH / 2, getHeight() / 2 - 10, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT);
     }
 
     private Rectangle getExitButtonBounds() {
-        return new Rectangle(getWidth() / 2 - 150, getHeight() / 2 + 70, 300, 60);
+        return new Rectangle(getWidth() / 2 - PAUSE_BUTTON_WIDTH / 2, getHeight() / 2 + 70, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT);
     }
 
     private void drawPauseMenu(Graphics g) {
@@ -398,7 +412,7 @@ public class GameManager extends JPanel {
     public void resetGame() {
         score = 0;
         enemies.clear();
-        powerUps.clear(); // 👈 limpiar también los powerups
+        powerUps.clear();
         player.resetState();
         gameOver = false;
         paused = false;

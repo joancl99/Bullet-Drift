@@ -5,6 +5,8 @@ import java.awt.*;
 
 public class Enemy {
     private static final int IMAGE_SIZE = 90;
+    private static final int HITBOX_WIDTH = 44;
+    private static final int HITBOX_HEIGHT = 58;
 
     private int x, y, speed;
     private Image enemyImage;
@@ -21,23 +23,15 @@ public class Enemy {
     }
 
     public void paint(Graphics g) {
-    // Dibuja la imagen del enemigo
-    g.drawImage(enemyImage, x, y, IMAGE_SIZE, IMAGE_SIZE, null);
-
-    // Dibuja el hitbox en rojo para depuración
-
+        g.drawImage(enemyImage, x, y, IMAGE_SIZE, IMAGE_SIZE, null);
     }
 
     public Rectangle getHitBoxEnemy() {
-    int hitboxWidth = 44;
-    int hitboxHeight = 58;
+        int hitboxX = x + (IMAGE_SIZE - HITBOX_WIDTH) / 2;
+        int hitboxY = y + (IMAGE_SIZE - HITBOX_HEIGHT) / 2;
 
-    // Ajusta la posición del hitbox dentro de la imagen
-    int hitboxX = x + (IMAGE_SIZE - hitboxWidth) / 2;  // centrado horizontalmente
-    int hitboxY = y + (IMAGE_SIZE - hitboxHeight) / 2; // centrado verticalmente
-
-    return new Rectangle(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
-}
+        return new Rectangle(hitboxX, hitboxY, HITBOX_WIDTH, HITBOX_HEIGHT);
+    }
 
     public int getX() {
         return x;

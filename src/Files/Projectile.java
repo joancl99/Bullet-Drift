@@ -4,13 +4,17 @@ import java.awt.*;
 import javax.swing.ImageIcon;
 
 public class Projectile {
-    private double x, y;      // posición real
-    private double dx, dy;    // velocidad en px por tick
-    private int baseSize = 25;
+    private static final int BASE_SIZE = 25;
+    private static final int DEFAULT_PANEL_WIDTH = 800;
+    private static final int DEFAULT_PANEL_HEIGHT = 600;
+    private static final int MIN_HITBOX_SIZE = 8;
+    private static final double HITBOX_SCALE = 0.45;
+
+    private double x, y;
+    private double dx, dy;
     private int width, height;
     private Image bulletImage;
-
-    private String direction; // 👈 nueva propiedad para rotación
+    private String direction;
 
     public Projectile(double x, double y, double dx, double dy, int panelWidth, int panelHeight, String direction) {
         this.x = x;
@@ -20,11 +24,10 @@ public class Projectile {
         this.direction = direction;
         this.bulletImage = new ImageIcon("Images/bullet.png").getImage();
 
-        // Escalamos el tamaño de la bala según la resolución
-        double scaleX = panelWidth / 800.0;
-        double scaleY = panelHeight / 600.0;
-        width = (int)(baseSize * scaleX);
-        height = (int)(baseSize * scaleY);
+        double scaleX = panelWidth / (double) DEFAULT_PANEL_WIDTH;
+        double scaleY = panelHeight / (double) DEFAULT_PANEL_HEIGHT;
+        width = (int)(BASE_SIZE * scaleX);
+        height = (int)(BASE_SIZE * scaleY);
     }
 
     public void move() {
@@ -52,8 +55,8 @@ public class Projectile {
     }
 
     public Rectangle getHitBox() {
-        int hitboxWidth = Math.max(8, (int) (width * 0.45));
-        int hitboxHeight = Math.max(8, (int) (height * 0.45));
+        int hitboxWidth = Math.max(MIN_HITBOX_SIZE, (int) (width * HITBOX_SCALE));
+        int hitboxHeight = Math.max(MIN_HITBOX_SIZE, (int) (height * HITBOX_SCALE));
         int hitboxX = (int) x + (width - hitboxWidth) / 2;
         int hitboxY = (int) y + (height - hitboxHeight) / 2;
 

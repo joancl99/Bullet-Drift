@@ -7,13 +7,19 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 public class Player extends JPanel {
-    private final double SPEED = 10;
-    private final int PROJECTILESPEED = 30;
-    private final int PLAYERWIDTH = 25;
-    private final int PLAYERHEIGHT = 35;
-    private final int INITIAL_LIVES = 3;
-    private final int NORMAL_SHOOT_COOLDOWN_MS = 550;
-    private final int RAPID_SHOOT_COOLDOWN_MS = 80;
+    private static final double SPEED = 10;
+    private static final int PROJECTILE_SPEED = 30;
+    private static final int PLAYER_BASE_WIDTH = 25;
+    private static final int PLAYER_BASE_HEIGHT = 35;
+    private static final int INITIAL_LIVES = 3;
+    private static final int MOVEMENT_TIMER_DELAY_MS = 16;
+    private static final int NORMAL_SHOOT_COOLDOWN_MS = 550;
+    private static final int RAPID_SHOOT_COOLDOWN_MS = 120;
+    private static final int DEFAULT_PANEL_WIDTH = 800;
+    private static final int DEFAULT_PANEL_HEIGHT = 600;
+    private static final double HITBOX_WIDTH_SCALE = 0.58;
+    private static final double HITBOX_HEIGHT_SCALE = 0.70;
+    private static final int PROJECTILE_SPAWN_OFFSET = 5;
 
     private int x, y;
     private boolean facingLeft, facingRight, facingUp, facingDown;
@@ -25,10 +31,8 @@ public class Player extends JPanel {
 
     ArrayList<Projectile> projectiles;
 
-    private boolean canShoot;
-    private Timer shootCooldownTimer;
+    private long lastShootTime;
 
-    // 👇 NUEVOS CAMPOS
     private int lives;
     private boolean rapidFire;
     private boolean shieldActive;
@@ -50,13 +54,11 @@ public class Player extends JPanel {
         this.playerImage = new ImageIcon("Images/loco1.png").getImage();
         setFocusable(true);
 
-        movementTimer = new Timer(16, e -> updateMovement());
+        movementTimer = new Timer(MOVEMENT_TIMER_DELAY_MS, e -> updateMovement());
         movementTimer.start();
 
-        canShoot = true;
-        shootCooldownTimer = new Timer(NORMAL_SHOOT_COOLDOWN_MS, e -> canShoot = true);
+        lastShootTime = 0;
 
-        // 👇 inicializamos powerups
         lives = INITIAL_LIVES;
         rapidFire = false;
         shieldActive = false;
@@ -72,11 +74,11 @@ public class Player extends JPanel {
     }
 
     public void updateScale() {
-        double scaleX = panelWidth / 800.0;
-        double scaleY = panelHeight / 600.0;
+        double scaleX = panelWidth / (double) DEFAULT_PANEL_WIDTH;
+        double scaleY = panelHeight / (double) DEFAULT_PANEL_HEIGHT;
 
-        width = (int) (PLAYERWIDTH * scaleX);
-        height = (int) (PLAYERHEIGHT * scaleY);
+        width = (int) (PLAYER_BASE_WIDTH * scaleX);
+        height = (int) (PLAYER_BASE_HEIGHT * scaleY);
     }
 
     @Override
@@ -108,13 +110,11 @@ public class Player extends JPanel {
             }
         }
 
-        // Dibujar escudo si está activo
         if (shieldActive) {
             g2d.setColor(new Color(0, 200, 255, 100));
             g2d.fillOval(x - 10, y - 10, width + 20, height + 20);
         }
 
-        // Dibujar proyectiles
         for (Projectile p : projectiles) {
             p.paint(g);
         }
@@ -152,7 +152,6 @@ public class Player extends JPanel {
             }
         }
 
-        // 👇 actualizar escudo
         if (shieldActive && System.currentTimeMillis() > shieldEndTime) {
             shieldActive = false;
         }
@@ -197,8 +196,8 @@ public class Player extends JPanel {
     }
 
     public Rectangle getHitBox() {
-        int hitboxWidth = (int) (width * 0.58);
-        int hitboxHeight = (int) (height * 0.70);
+        int hitboxWidth = (int) (width * HITBOX_WIDTH_SCALE);
+        int hitboxHeight = (int) (height * HITBOX_HEIGHT_SCALE);
         int hitboxX = x + (width - hitboxWidth) / 2;
         int hitboxY = y + (height - hitboxHeight) / 2;
 
@@ -206,27 +205,30 @@ public class Player extends JPanel {
     }
 
     public void shoot() {
-        if (!canShoot) return;
+        long now = System.currentTimeMillis();
+        int shootCooldownMs = rapidFire ? RAPID_SHOOT_COOLDOWN_MS : NORMAL_SHOOT_COOLDOWN_MS;
+        if (now - lastShootTime < shootCooldownMs) return;
 
-        int currentPanelWidth = getParent() != null ? getParent().getWidth() : 800;
-        int currentPanelHeight = getParent() != null ? getParent().getHeight() : 600;
+        int currentPanelWidth = getParent() != null ? getParent().getWidth() : DEFAULT_PANEL_WIDTH;
+        int currentPanelHeight = getParent() != null ? getParent().getHeight() : DEFAULT_PANEL_HEIGHT;
 
-        int speed = PROJECTILESPEED;
+        int speed = PROJECTILE_SPEED;
+        boolean projectileCreated = true;
 
         if (facingUp) 
-            projectiles.add(new Projectile(x + width / 2 - 5, y, 0, -speed, currentPanelWidth, currentPanelHeight, "up"));
+            projectiles.add(new Projectile(x + width / 2 - PROJECTILE_SPAWN_OFFSET, y, 0, -speed, currentPanelWidth, currentPanelHeight, "up"));
         else if (facingDown) 
-            projectiles.add(new Projectile(x + width / 2 - 5, y + height, 0, speed, currentPanelWidth, currentPanelHeight, "down"));
+            projectiles.add(new Projectile(x + width / 2 - PROJECTILE_SPAWN_OFFSET, y + height, 0, speed, currentPanelWidth, currentPanelHeight, "down"));
         else if (facingLeft) 
-            projectiles.add(new Projectile(x, y + height / 2 - 5, -speed, 0, currentPanelWidth, currentPanelHeight, "left"));
+            projectiles.add(new Projectile(x, y + height / 2 - PROJECTILE_SPAWN_OFFSET, -speed, 0, currentPanelWidth, currentPanelHeight, "left"));
         else if (facingRight) 
-            projectiles.add(new Projectile(x + width, y + height / 2 - 5, speed, 0, currentPanelWidth, currentPanelHeight, "right"));
+            projectiles.add(new Projectile(x + width, y + height / 2 - PROJECTILE_SPAWN_OFFSET, speed, 0, currentPanelWidth, currentPanelHeight, "right"));
+        else
+            projectileCreated = false;
 
-        canShoot = false;
-
-        // 👇 si rapidFire activo, cooldown más corto
-        shootCooldownTimer.setDelay(rapidFire ? RAPID_SHOOT_COOLDOWN_MS : NORMAL_SHOOT_COOLDOWN_MS);
-        shootCooldownTimer.restart();
+        if (projectileCreated) {
+            lastShootTime = now;
+        }
     }
 
     public void updateProjectiles(int panelWidth, int panelHeight) {
@@ -246,8 +248,6 @@ public class Player extends JPanel {
         this.panelHeight = panelHeight;
         updateScale();
     }
-
-    // 👇 MÉTODOS NUEVOS
 
     public void addLife(int amount) {
         lives += amount;
@@ -280,6 +280,7 @@ public class Player extends JPanel {
 
     public void activateRapidFire(long durationMs) {
         rapidFire = true;
+        lastShootTime = 0;
         rapidFireEndTime = System.currentTimeMillis() + durationMs;
     }
 
@@ -319,7 +320,7 @@ public class Player extends JPanel {
         rapidFireEndTime = 0;
         shieldEndTime = 0;
         invulnerabilityEndTime = 0;
-        canShoot = true;
+        lastShootTime = 0;
         projectiles.clear();
         pressedKeys.clear();
         x = (panelWidth - width) / 2;
