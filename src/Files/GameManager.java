@@ -11,11 +11,23 @@ public class GameManager extends JPanel {
     private static final int PANEL_WIDTH = 1920;
     private static final int PANEL_HEIGHT = 1080;
     private static final int GAME_TIMER_DELAY_MS = 20;
-    private static final int MAX_ENEMIES = 20;
+    private static final int BASE_MAX_ENEMIES = 6;
+    private static final int MAX_ENEMIES_LIMIT = 40;
+    private static final int ENEMIES_PER_WAVE = 4;
     private static final int ENEMY_SPAWN_MARGIN = 50;
     private static final int ENEMY_START_Y = -50;
-    private static final int MIN_ENEMY_SPEED = 2;
-    private static final int ENEMY_SPEED_VARIATION = 7;
+    private static final int BASE_MIN_ENEMY_SPEED = 2;
+    private static final int BASE_ENEMY_SPEED_VARIATION = 4;
+    private static final int MAX_ENEMY_SPEED_LIMIT = 22;
+    private static final int BASE_ENEMY_SPAWN_CHANCE = 55;
+    private static final int MIN_ENEMY_SPAWN_CHANCE = 6;
+    private static final int ENEMY_SPAWN_CHANCE_REDUCTION_PER_WAVE = 7;
+    private static final int FAST_ENEMY_START_WAVE = 2;
+    private static final int FAST_ENEMY_BASE_CHANCE_PERCENT = 20;
+    private static final int FAST_ENEMY_CHANCE_PER_WAVE_PERCENT = 8;
+    private static final int FAST_ENEMY_MAX_CHANCE_PERCENT = 65;
+    private static final int FAST_ENEMY_SPEED_BONUS = 4;
+    private static final int POINTS_PER_WAVE = 100;
     private static final int MAX_POWER_UPS = 3;
     private static final int POWER_UP_SPAWN_CHANCE = 500;
     private static final int POWER_UP_SPAWN_MARGIN = 50;
@@ -28,11 +40,18 @@ public class GameManager extends JPanel {
     private static final long DAMAGE_INVULNERABILITY_MS = 1000;
     private static final int POWER_UP_TOP_MARGIN = 220;
     private static final long POWER_UP_FEEDBACK_DURATION_MS = 1200;
+    private static final long WAVE_FEEDBACK_DURATION_MS = 1800;
+    private static final int ENEMY_COLLISION_DAMAGE = 20;
     private static final int HUD_X = 40;
     private static final int HUD_SCORE_Y = 150;
     private static final int HUD_LIVES_Y = 200;
-    private static final int HUD_POWER_UP_Y = 250;
+    private static final int HEALTH_BAR_Y = 220;
+    private static final int HEALTH_BAR_WIDTH = 260;
+    private static final int HEALTH_BAR_HEIGHT = 26;
+    private static final int HUD_POWER_UP_Y = 285;
     private static final int HUD_LINE_HEIGHT = 40;
+    private static final int WAVE_HUD_Y = 70;
+    private static final int WAVE_FEEDBACK_Y_OFFSET = 120;
     private static final int PAUSE_BUTTON_WIDTH = 300;
     private static final int PAUSE_BUTTON_HEIGHT = 60;
 
@@ -48,6 +67,9 @@ public class GameManager extends JPanel {
     private String powerUpFeedbackText;
     private Color powerUpFeedbackColor;
     private long powerUpFeedbackEndTime;
+    private int lastAnnouncedWave;
+    private String waveFeedbackText;
+    private long waveFeedbackEndTime;
     private Image backgroundImage;
 
     public GameManager() {
@@ -69,6 +91,9 @@ public class GameManager extends JPanel {
         powerUpFeedbackText = "";
         powerUpFeedbackColor = Color.WHITE;
         powerUpFeedbackEndTime = 0;
+        lastAnnouncedWave = 0;
+        waveFeedbackText = "";
+        waveFeedbackEndTime = 0;
         backgroundImage = new ImageIcon("Images/fondo1.png").getImage();
 
         powerUps.add(new PowerUps(180, 330, POWER_UP_RAPID_FIRE));
@@ -152,12 +177,37 @@ public class GameManager extends JPanel {
     private void generateEnemies() {
         if (getWidth() <= ENEMY_SPAWN_MARGIN) return;
 
-        if (enemies.size() < MAX_ENEMIES) {
+        int wave = getWave();
+        int maxEnemies = Math.min(MAX_ENEMIES_LIMIT, BASE_MAX_ENEMIES + wave * ENEMIES_PER_WAVE);
+        int spawnChance = Math.max(MIN_ENEMY_SPAWN_CHANCE, BASE_ENEMY_SPAWN_CHANCE - wave * ENEMY_SPAWN_CHANCE_REDUCTION_PER_WAVE);
+
+        if (enemies.size() < maxEnemies && rand.nextInt(spawnChance) == 0) {
             int x = rand.nextInt(getWidth() - ENEMY_SPAWN_MARGIN);
             int y = ENEMY_START_Y;
-            int speed = rand.nextInt(ENEMY_SPEED_VARIATION) + MIN_ENEMY_SPEED;
-            enemies.add(new Enemy(x, y, speed));
+            int minSpeed = Math.min(MAX_ENEMY_SPEED_LIMIT - 1, BASE_MIN_ENEMY_SPEED + wave);
+            int speedVariation = BASE_ENEMY_SPEED_VARIATION + wave * 2;
+            int speed = Math.min(MAX_ENEMY_SPEED_LIMIT, rand.nextInt(speedVariation) + minSpeed);
+            Enemy.Type enemyType = getEnemyTypeForWave(wave);
+            if (enemyType == Enemy.Type.FAST) {
+                speed = Math.min(MAX_ENEMY_SPEED_LIMIT, speed + FAST_ENEMY_SPEED_BONUS);
+            }
+
+            enemies.add(new Enemy(x, y, speed, enemyType));
         }
+    }
+
+    private Enemy.Type getEnemyTypeForWave(int wave) {
+        if (wave < FAST_ENEMY_START_WAVE) return Enemy.Type.NORMAL;
+
+        int fastChance = Math.min(
+            FAST_ENEMY_MAX_CHANCE_PERCENT,
+            FAST_ENEMY_BASE_CHANCE_PERCENT + (wave - FAST_ENEMY_START_WAVE) * FAST_ENEMY_CHANCE_PER_WAVE_PERCENT
+        );
+        return rand.nextInt(100) < fastChance ? Enemy.Type.FAST : Enemy.Type.NORMAL;
+    }
+
+    private int getWave() {
+        return score / POINTS_PER_WAVE;
     }
 
     private void generatePowerUps() {
@@ -200,13 +250,14 @@ public class GameManager extends JPanel {
                     continue;
                 }
 
-                player.loseLife(1);
-                player.activateInvulnerability(DAMAGE_INVULNERABILITY_MS);
-                if (player.getLives() <= 0) {
-                    gameOver = true;
-                    repaint();
+                player.takeDamage(ENEMY_COLLISION_DAMAGE);
+                if (player.isDead()) {
+                    handlePlayerLifeLost();
                     return;
                 }
+
+                showPowerUpFeedback("-" + ENEMY_COLLISION_DAMAGE + " HP", new Color(255, 90, 90));
+                player.activateInvulnerability(DAMAGE_INVULNERABILITY_MS);
 
                 continue;
             }
@@ -216,6 +267,7 @@ public class GameManager extends JPanel {
                     enemyIterator.remove();
                     player.projectiles.remove(projectile);
                     score += SCORE_PER_ENEMY;
+                    updateWaveFeedback();
                     break;
                 }
             }
@@ -229,6 +281,28 @@ public class GameManager extends JPanel {
                 powerUpIterator.remove();
             }
         }
+    }
+
+    private void handlePlayerLifeLost() {
+        int waveStartScore = getWave() * POINTS_PER_WAVE;
+        player.loseLife(1);
+
+        if (player.getLives() <= 0) {
+            gameOver = true;
+            repaint();
+            return;
+        }
+
+        score = waveStartScore;
+        enemies.clear();
+        powerUps.clear();
+        player.resetAfterLifeLost(DAMAGE_INVULNERABILITY_MS);
+        lastAnnouncedWave = getWave();
+        waveFeedbackText = "";
+        waveFeedbackEndTime = 0;
+        firing = false;
+        showPowerUpFeedback("VIDA PERDIDA", new Color(255, 90, 90));
+        repaint();
     }
 
     private void aplicarPowerUp(PowerUps powerUp) {
@@ -271,6 +345,8 @@ public class GameManager extends JPanel {
         g.setFont(new Font("Arial", Font.BOLD, 40));
         g.drawString("Puntos: " + score, HUD_X, HUD_SCORE_Y);
         g.drawString("Vidas: " + player.getLives(), HUD_X, HUD_LIVES_Y);
+        drawPlayerHealthBar(g);
+        drawWaveHud(g);
 
         g.setFont(new Font("Arial", Font.BOLD, 28));
         int powerUpTextY = HUD_POWER_UP_Y;
@@ -288,6 +364,7 @@ public class GameManager extends JPanel {
         }
 
         drawPowerUpFeedback(g);
+        drawWaveFeedback(g);
 
         if (paused) {
             drawPauseMenu(g);
@@ -304,6 +381,64 @@ public class GameManager extends JPanel {
         powerUpFeedbackText = text;
         powerUpFeedbackColor = color;
         powerUpFeedbackEndTime = System.currentTimeMillis() + POWER_UP_FEEDBACK_DURATION_MS;
+    }
+
+    private void drawWaveHud(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setFont(new Font("Arial", Font.BOLD, 46));
+        String waveText = "Oleada " + getWave();
+        FontMetrics metrics = g2d.getFontMetrics();
+        int textX = (getWidth() - metrics.stringWidth(waveText)) / 2;
+
+        g2d.setColor(new Color(0, 0, 0, 150));
+        g2d.drawString(waveText, textX + 3, WAVE_HUD_Y + 3);
+        g2d.setColor(Color.WHITE);
+        g2d.drawString(waveText, textX, WAVE_HUD_Y);
+    }
+
+    private void drawPlayerHealthBar(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        int health = player.getHealth();
+        int maxHealth = player.getMaxHealth();
+        int filledWidth = (int) (HEALTH_BAR_WIDTH * (health / (double) maxHealth));
+
+        g2d.setColor(new Color(0, 0, 0, 170));
+        g2d.fillRect(HUD_X, HEALTH_BAR_Y, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
+        g2d.setColor(new Color(220, 45, 45));
+        g2d.fillRect(HUD_X, HEALTH_BAR_Y, filledWidth, HEALTH_BAR_HEIGHT);
+        g2d.setColor(Color.WHITE);
+        g2d.drawRect(HUD_X, HEALTH_BAR_Y, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
+
+        g2d.setFont(new Font("Arial", Font.BOLD, 18));
+        String healthText = health + " / " + maxHealth + " HP";
+        FontMetrics metrics = g2d.getFontMetrics();
+        int textX = HUD_X + (HEALTH_BAR_WIDTH - metrics.stringWidth(healthText)) / 2;
+        int textY = HEALTH_BAR_Y + ((HEALTH_BAR_HEIGHT - metrics.getHeight()) / 2) + metrics.getAscent();
+        g2d.drawString(healthText, textX, textY);
+    }
+
+    private void updateWaveFeedback() {
+        int currentWave = getWave();
+        if (currentWave <= lastAnnouncedWave) return;
+
+        lastAnnouncedWave = currentWave;
+        waveFeedbackText = "OLEADA " + currentWave;
+        waveFeedbackEndTime = System.currentTimeMillis() + WAVE_FEEDBACK_DURATION_MS;
+    }
+
+    private void drawWaveFeedback(Graphics g) {
+        if (waveFeedbackText.isEmpty() || System.currentTimeMillis() > waveFeedbackEndTime) return;
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setFont(new Font("Arial", Font.BOLD, 74));
+        FontMetrics metrics = g2d.getFontMetrics();
+        int textX = (getWidth() - metrics.stringWidth(waveFeedbackText)) / 2;
+        int textY = getHeight() / 2 - WAVE_FEEDBACK_Y_OFFSET;
+
+        g2d.setColor(new Color(0, 0, 0, 180));
+        g2d.drawString(waveFeedbackText, textX + 4, textY + 4);
+        g2d.setColor(new Color(255, 210, 80));
+        g2d.drawString(waveFeedbackText, textX, textY);
     }
 
     private void drawPowerUpFeedback(Graphics g) {
@@ -419,6 +554,9 @@ public class GameManager extends JPanel {
         firing = false;
         powerUpFeedbackText = "";
         powerUpFeedbackEndTime = 0;
+        lastAnnouncedWave = 0;
+        waveFeedbackText = "";
+        waveFeedbackEndTime = 0;
         repaint();
     }
 }

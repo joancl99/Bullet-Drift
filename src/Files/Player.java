@@ -12,6 +12,7 @@ public class Player extends JPanel {
     private static final int PLAYER_BASE_WIDTH = 25;
     private static final int PLAYER_BASE_HEIGHT = 35;
     private static final int INITIAL_LIVES = 3;
+    private static final int MAX_HEALTH = 60;
     private static final int MOVEMENT_TIMER_DELAY_MS = 16;
     private static final int NORMAL_SHOOT_COOLDOWN_MS = 550;
     private static final int RAPID_SHOOT_COOLDOWN_MS = 120;
@@ -34,6 +35,7 @@ public class Player extends JPanel {
     private long lastShootTime;
 
     private int lives;
+    private int health;
     private boolean rapidFire;
     private boolean shieldActive;
     private boolean invulnerable;
@@ -60,6 +62,7 @@ public class Player extends JPanel {
         lastShootTime = 0;
 
         lives = INITIAL_LIVES;
+        health = MAX_HEALTH;
         rapidFire = false;
         shieldActive = false;
 
@@ -261,6 +264,22 @@ public class Player extends JPanel {
         lives = Math.max(0, lives - amount);
     }
 
+    public void takeDamage(int amount) {
+        health = Math.max(0, health - amount);
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getMaxHealth() {
+        return MAX_HEALTH;
+    }
+
+    public boolean isDead() {
+        return health <= 0;
+    }
+
     public void activateInvulnerability(long durationMs) {
         invulnerable = true;
         invulnerabilityEndTime = System.currentTimeMillis() + durationMs;
@@ -314,6 +333,7 @@ public class Player extends JPanel {
 
     public void resetState() {
         lives = INITIAL_LIVES;
+        health = MAX_HEALTH;
         rapidFire = false;
         shieldActive = false;
         invulnerable = false;
@@ -325,5 +345,25 @@ public class Player extends JPanel {
         pressedKeys.clear();
         x = (panelWidth - width) / 2;
         y = (panelHeight - height) / 2;
+    }
+
+    public void resetAfterLifeLost(long invulnerabilityDurationMs) {
+        health = MAX_HEALTH;
+        rapidFire = false;
+        shieldActive = false;
+        rapidFireEndTime = 0;
+        shieldEndTime = 0;
+        lastShootTime = 0;
+        projectiles.clear();
+        pressedKeys.clear();
+        centerInPanel();
+        activateInvulnerability(invulnerabilityDurationMs);
+    }
+
+    private void centerInPanel() {
+        int currentPanelWidth = getParent() != null ? getParent().getWidth() : panelWidth;
+        int currentPanelHeight = getParent() != null ? getParent().getHeight() : panelHeight;
+        x = (currentPanelWidth - width) / 2;
+        y = (currentPanelHeight - height) / 2;
     }
 }
