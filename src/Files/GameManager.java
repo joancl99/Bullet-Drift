@@ -42,6 +42,8 @@ public class GameManager extends JPanel {
     private static final int WAVE_FEEDBACK_Y_OFFSET = 120;
     private static final int PAUSE_BUTTON_WIDTH = 300;
     private static final int PAUSE_BUTTON_HEIGHT = 60;
+    private static final double MIN_HUD_SCALE = 0.65;
+    private static final double MAX_HUD_SCALE = 1.25;
 
     private Player player;
     private ArrayList<Enemy> enemies;
@@ -337,25 +339,28 @@ public class GameManager extends JPanel {
         }
 
 
+        int hudX = scaleHud(HUD_X);
+        int hudLineHeight = scaleHud(HUD_LINE_HEIGHT);
+
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 40));
-        g.drawString("Puntos: " + score, HUD_X, HUD_SCORE_Y);
-        g.drawString("Vidas: " + player.getLives(), HUD_X, HUD_LIVES_Y);
+        g.setFont(new Font("Arial", Font.BOLD, scaleFont(40)));
+        g.drawString("Puntos: " + score, hudX, scaleHud(HUD_SCORE_Y));
+        g.drawString("Vidas: " + player.getLives(), hudX, scaleHud(HUD_LIVES_Y));
         drawPlayerHealthBar(g);
         drawWaveHud(g);
 
-        g.setFont(new Font("Arial", Font.BOLD, 28));
-        int powerUpTextY = HUD_POWER_UP_Y;
+        g.setFont(new Font("Arial", Font.BOLD, scaleFont(28)));
+        int powerUpTextY = scaleHud(HUD_POWER_UP_Y);
         if (player.hasShield()) {
-            g.drawString("Escudo: " + player.getShieldSecondsLeft() + "s", HUD_X, powerUpTextY);
-            powerUpTextY += HUD_LINE_HEIGHT;
+            g.drawString("Escudo: " + player.getShieldSecondsLeft() + "s", hudX, powerUpTextY);
+            powerUpTextY += hudLineHeight;
         }
         if (player.isRapidFire()) {
-            g.drawString("Disparo rapido: " + player.getRapidFireSecondsLeft() + "s", HUD_X, powerUpTextY);
+            g.drawString("Disparo rapido: " + player.getRapidFireSecondsLeft() + "s", hudX, powerUpTextY);
         }
 
         if (debugHitboxes) {
-            g.drawString("Hitboxes: ON", HUD_X, getHeight() - HUD_LINE_HEIGHT);
+            g.drawString("Hitboxes: ON", hudX, getHeight() - hudLineHeight);
             drawHitboxes(g);
         }
 
@@ -367,10 +372,30 @@ public class GameManager extends JPanel {
         }
 
         if (gameOver) {
-            g.setFont(new Font("Arial", Font.BOLD, 30));
-            g.drawString("¡Has perdido!", getWidth() / 2 - 150, getHeight() / 2 - 50);
-            g.drawString("Presiona ENTER para reiniciar", getWidth() / 2 - 200, getHeight() / 2);
+            g.setFont(new Font("Arial", Font.BOLD, scaleFont(30)));
+            drawCenteredString(g, "¡Has perdido!", getHeight() / 2 - scaleHud(50));
+            drawCenteredString(g, "Presiona ENTER para reiniciar", getHeight() / 2);
         }
+    }
+
+    private double getHudScale() {
+        double scaleX = getWidth() / (double) DESIGN_WIDTH;
+        double scaleY = getHeight() / (double) DESIGN_HEIGHT;
+        return Math.max(MIN_HUD_SCALE, Math.min(MAX_HUD_SCALE, Math.min(scaleX, scaleY)));
+    }
+
+    private int scaleHud(int value) {
+        return Math.max(1, (int) Math.round(value * getHudScale()));
+    }
+
+    private int scaleFont(int size) {
+        return Math.max(12, scaleHud(size));
+    }
+
+    private void drawCenteredString(Graphics g, String text, int y) {
+        FontMetrics metrics = g.getFontMetrics();
+        int textX = (getWidth() - metrics.stringWidth(text)) / 2;
+        g.drawString(text, textX, y);
     }
 
     private void showPowerUpFeedback(String text, Color color) {
@@ -381,35 +406,41 @@ public class GameManager extends JPanel {
 
     private void drawWaveHud(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setFont(new Font("Arial", Font.BOLD, 46));
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(46)));
         String waveText = "Oleada " + getWave();
         FontMetrics metrics = g2d.getFontMetrics();
         int textX = (getWidth() - metrics.stringWidth(waveText)) / 2;
+        int waveY = scaleHud(WAVE_HUD_Y);
+        int shadowOffset = scaleHud(3);
 
         g2d.setColor(new Color(0, 0, 0, 150));
-        g2d.drawString(waveText, textX + 3, WAVE_HUD_Y + 3);
+        g2d.drawString(waveText, textX + shadowOffset, waveY + shadowOffset);
         g2d.setColor(Color.WHITE);
-        g2d.drawString(waveText, textX, WAVE_HUD_Y);
+        g2d.drawString(waveText, textX, waveY);
     }
 
     private void drawPlayerHealthBar(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         int health = player.getHealth();
         int maxHealth = player.getMaxHealth();
-        int filledWidth = (int) (HEALTH_BAR_WIDTH * (health / (double) maxHealth));
+        int hudX = scaleHud(HUD_X);
+        int healthBarY = scaleHud(HEALTH_BAR_Y);
+        int healthBarWidth = scaleHud(HEALTH_BAR_WIDTH);
+        int healthBarHeight = scaleHud(HEALTH_BAR_HEIGHT);
+        int filledWidth = (int) (healthBarWidth * (health / (double) maxHealth));
 
         g2d.setColor(new Color(0, 0, 0, 170));
-        g2d.fillRect(HUD_X, HEALTH_BAR_Y, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
+        g2d.fillRect(hudX, healthBarY, healthBarWidth, healthBarHeight);
         g2d.setColor(new Color(220, 45, 45));
-        g2d.fillRect(HUD_X, HEALTH_BAR_Y, filledWidth, HEALTH_BAR_HEIGHT);
+        g2d.fillRect(hudX, healthBarY, filledWidth, healthBarHeight);
         g2d.setColor(Color.WHITE);
-        g2d.drawRect(HUD_X, HEALTH_BAR_Y, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
+        g2d.drawRect(hudX, healthBarY, healthBarWidth, healthBarHeight);
 
-        g2d.setFont(new Font("Arial", Font.BOLD, 18));
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(18)));
         String healthText = health + " / " + maxHealth + " HP";
         FontMetrics metrics = g2d.getFontMetrics();
-        int textX = HUD_X + (HEALTH_BAR_WIDTH - metrics.stringWidth(healthText)) / 2;
-        int textY = HEALTH_BAR_Y + ((HEALTH_BAR_HEIGHT - metrics.getHeight()) / 2) + metrics.getAscent();
+        int textX = hudX + (healthBarWidth - metrics.stringWidth(healthText)) / 2;
+        int textY = healthBarY + ((healthBarHeight - metrics.getHeight()) / 2) + metrics.getAscent();
         g2d.drawString(healthText, textX, textY);
     }
 
@@ -426,13 +457,14 @@ public class GameManager extends JPanel {
         if (waveFeedbackText.isEmpty() || System.currentTimeMillis() > waveFeedbackEndTime) return;
 
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setFont(new Font("Arial", Font.BOLD, 74));
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(74)));
         FontMetrics metrics = g2d.getFontMetrics();
         int textX = (getWidth() - metrics.stringWidth(waveFeedbackText)) / 2;
-        int textY = getHeight() / 2 - WAVE_FEEDBACK_Y_OFFSET;
+        int textY = getHeight() / 2 - scaleHud(WAVE_FEEDBACK_Y_OFFSET);
+        int shadowOffset = scaleHud(4);
 
         g2d.setColor(new Color(0, 0, 0, 180));
-        g2d.drawString(waveFeedbackText, textX + 4, textY + 4);
+        g2d.drawString(waveFeedbackText, textX + shadowOffset, textY + shadowOffset);
         g2d.setColor(new Color(255, 210, 80));
         g2d.drawString(waveFeedbackText, textX, textY);
     }
@@ -441,13 +473,14 @@ public class GameManager extends JPanel {
         if (powerUpFeedbackText.isEmpty() || System.currentTimeMillis() > powerUpFeedbackEndTime) return;
 
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setFont(new Font("Arial", Font.BOLD, 42));
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(42)));
         FontMetrics metrics = g2d.getFontMetrics();
         int textX = (getWidth() - metrics.stringWidth(powerUpFeedbackText)) / 2;
-        int textY = 120;
+        int textY = scaleHud(120);
+        int shadowOffset = scaleHud(3);
 
         g2d.setColor(new Color(0, 0, 0, 160));
-        g2d.drawString(powerUpFeedbackText, textX + 3, textY + 3);
+        g2d.drawString(powerUpFeedbackText, textX + shadowOffset, textY + shadowOffset);
         g2d.setColor(powerUpFeedbackColor);
         g2d.drawString(powerUpFeedbackText, textX, textY);
     }
@@ -455,7 +488,7 @@ public class GameManager extends JPanel {
     private void drawHitboxes(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         Stroke previousStroke = g2d.getStroke();
-        g2d.setStroke(new BasicStroke(2));
+        g2d.setStroke(new BasicStroke(scaleHud(2)));
 
         g2d.setColor(Color.GREEN);
         Rectangle playerHitbox = player.getHitBox();
@@ -504,11 +537,15 @@ public class GameManager extends JPanel {
     }
 
     private Rectangle getResumeButtonBounds() {
-        return new Rectangle(getWidth() / 2 - PAUSE_BUTTON_WIDTH / 2, getHeight() / 2 - 10, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT);
+        int buttonWidth = scaleHud(PAUSE_BUTTON_WIDTH);
+        int buttonHeight = scaleHud(PAUSE_BUTTON_HEIGHT);
+        return new Rectangle(getWidth() / 2 - buttonWidth / 2, getHeight() / 2 - scaleHud(10), buttonWidth, buttonHeight);
     }
 
     private Rectangle getExitButtonBounds() {
-        return new Rectangle(getWidth() / 2 - PAUSE_BUTTON_WIDTH / 2, getHeight() / 2 + 70, PAUSE_BUTTON_WIDTH, PAUSE_BUTTON_HEIGHT);
+        int buttonWidth = scaleHud(PAUSE_BUTTON_WIDTH);
+        int buttonHeight = scaleHud(PAUSE_BUTTON_HEIGHT);
+        return new Rectangle(getWidth() / 2 - buttonWidth / 2, getHeight() / 2 + scaleHud(70), buttonWidth, buttonHeight);
     }
 
     private void drawPauseMenu(Graphics g) {
@@ -517,14 +554,14 @@ public class GameManager extends JPanel {
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 56));
-        g2d.drawString("PAUSA", getWidth() / 2 - 95, getHeight() / 2 - 90);
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(56)));
+        drawCenteredString(g2d, "PAUSA", getHeight() / 2 - scaleHud(90));
 
         drawMenuButton(g2d, getResumeButtonBounds(), "Reanudar");
         drawMenuButton(g2d, getExitButtonBounds(), "Salir");
 
-        g2d.setFont(new Font("Arial", Font.BOLD, 22));
-        g2d.drawString("ESC/ENTER: reanudar   Q: salir", getWidth() / 2 - 170, getHeight() / 2 + 170);
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(22)));
+        drawCenteredString(g2d, "ESC/ENTER: reanudar   Q: salir", getHeight() / 2 + scaleHud(170));
     }
 
     private void drawMenuButton(Graphics2D g2d, Rectangle bounds, String text) {
@@ -532,7 +569,7 @@ public class GameManager extends JPanel {
         g2d.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         g2d.setColor(Color.WHITE);
         g2d.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-        g2d.setFont(new Font("Arial", Font.BOLD, 30));
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(30)));
 
         FontMetrics metrics = g2d.getFontMetrics();
         int textX = bounds.x + (bounds.width - metrics.stringWidth(text)) / 2;
