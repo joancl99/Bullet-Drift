@@ -11,22 +11,6 @@ public class GameManager extends JPanel {
     private static final int PANEL_WIDTH = 1920;
     private static final int PANEL_HEIGHT = 1080;
     private static final int GAME_TIMER_DELAY_MS = 20;
-    private static final int BASE_MAX_ENEMIES = 6;
-    private static final int MAX_ENEMIES_LIMIT = 40;
-    private static final int ENEMIES_PER_WAVE = 4;
-    private static final int ENEMY_SPAWN_MARGIN = 50;
-    private static final int ENEMY_START_Y = -50;
-    private static final int BASE_MIN_ENEMY_SPEED = 2;
-    private static final int BASE_ENEMY_SPEED_VARIATION = 4;
-    private static final int MAX_ENEMY_SPEED_LIMIT = 22;
-    private static final int BASE_ENEMY_SPAWN_CHANCE = 55;
-    private static final int MIN_ENEMY_SPAWN_CHANCE = 6;
-    private static final int ENEMY_SPAWN_CHANCE_REDUCTION_PER_WAVE = 7;
-    private static final int FAST_ENEMY_START_WAVE = 2;
-    private static final int FAST_ENEMY_BASE_CHANCE_PERCENT = 20;
-    private static final int FAST_ENEMY_CHANCE_PER_WAVE_PERCENT = 8;
-    private static final int FAST_ENEMY_MAX_CHANCE_PERCENT = 65;
-    private static final int FAST_ENEMY_SPEED_BONUS = 4;
     private static final int POINTS_PER_WAVE = 100;
     private static final int MAX_POWER_UPS = 3;
     private static final int POWER_UP_SPAWN_CHANCE = 500;
@@ -42,6 +26,7 @@ public class GameManager extends JPanel {
     private static final long POWER_UP_FEEDBACK_DURATION_MS = 1200;
     private static final long WAVE_FEEDBACK_DURATION_MS = 1800;
     private static final int ENEMY_COLLISION_DAMAGE = 20;
+    private static final int LIFE_POWER_UP_HEAL_AMOUNT = 20;
     private static final int HUD_X = 40;
     private static final int HUD_SCORE_Y = 150;
     private static final int HUD_LIVES_Y = 200;
@@ -58,6 +43,7 @@ public class GameManager extends JPanel {
     private Player player;
     private ArrayList<Enemy> enemies;
     private ArrayList<PowerUps> powerUps;
+    private EnemySpawner enemySpawner;
     private int score;
     private Random rand;
     private boolean gameOver;
@@ -83,6 +69,7 @@ public class GameManager extends JPanel {
         enemies = new ArrayList<>();
         powerUps = new ArrayList<>();
         rand = new Random();
+        enemySpawner = new EnemySpawner(rand);
         score = 0;
         gameOver = false;
         debugHitboxes = false;
@@ -175,35 +162,7 @@ public class GameManager extends JPanel {
     }
 
     private void generateEnemies() {
-        if (getWidth() <= ENEMY_SPAWN_MARGIN) return;
-
-        int wave = getWave();
-        int maxEnemies = Math.min(MAX_ENEMIES_LIMIT, BASE_MAX_ENEMIES + wave * ENEMIES_PER_WAVE);
-        int spawnChance = Math.max(MIN_ENEMY_SPAWN_CHANCE, BASE_ENEMY_SPAWN_CHANCE - wave * ENEMY_SPAWN_CHANCE_REDUCTION_PER_WAVE);
-
-        if (enemies.size() < maxEnemies && rand.nextInt(spawnChance) == 0) {
-            int x = rand.nextInt(getWidth() - ENEMY_SPAWN_MARGIN);
-            int y = ENEMY_START_Y;
-            int minSpeed = Math.min(MAX_ENEMY_SPEED_LIMIT - 1, BASE_MIN_ENEMY_SPEED + wave);
-            int speedVariation = BASE_ENEMY_SPEED_VARIATION + wave * 2;
-            int speed = Math.min(MAX_ENEMY_SPEED_LIMIT, rand.nextInt(speedVariation) + minSpeed);
-            Enemy.Type enemyType = getEnemyTypeForWave(wave);
-            if (enemyType == Enemy.Type.FAST) {
-                speed = Math.min(MAX_ENEMY_SPEED_LIMIT, speed + FAST_ENEMY_SPEED_BONUS);
-            }
-
-            enemies.add(new Enemy(x, y, speed, enemyType));
-        }
-    }
-
-    private Enemy.Type getEnemyTypeForWave(int wave) {
-        if (wave < FAST_ENEMY_START_WAVE) return Enemy.Type.NORMAL;
-
-        int fastChance = Math.min(
-            FAST_ENEMY_MAX_CHANCE_PERCENT,
-            FAST_ENEMY_BASE_CHANCE_PERCENT + (wave - FAST_ENEMY_START_WAVE) * FAST_ENEMY_CHANCE_PER_WAVE_PERCENT
-        );
-        return rand.nextInt(100) < fastChance ? Enemy.Type.FAST : Enemy.Type.NORMAL;
+        enemySpawner.generateEnemy(enemies, getWidth(), getWave());
     }
 
     private int getWave() {
@@ -308,8 +267,13 @@ public class GameManager extends JPanel {
     private void aplicarPowerUp(PowerUps powerUp) {
         switch (powerUp.getType()) {
             case POWER_UP_LIFE:
-                player.addLife(1);
-                showPowerUpFeedback("+1 VIDA", new Color(80, 255, 120));
+                if (player.hasFullHealth()) {
+                    player.addLife(1);
+                    showPowerUpFeedback("+1 VIDA", new Color(80, 255, 120));
+                } else {
+                    player.heal(LIFE_POWER_UP_HEAL_AMOUNT);
+                    showPowerUpFeedback("+" + LIFE_POWER_UP_HEAL_AMOUNT + " HP", new Color(80, 255, 120));
+                }
                 break;
             case POWER_UP_SHIELD:
                 player.activateShield(SHIELD_DURATION_MS);

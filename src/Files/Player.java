@@ -268,6 +268,14 @@ public class Player extends JPanel {
         health = Math.max(0, health - amount);
     }
 
+    public void heal(int amount) {
+        health = Math.min(MAX_HEALTH, health + amount);
+    }
+
+    public boolean hasFullHealth() {
+        return health >= MAX_HEALTH;
+    }
+
     public int getHealth() {
         return health;
     }
