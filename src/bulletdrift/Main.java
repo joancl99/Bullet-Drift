@@ -1,4 +1,6 @@
-package Files;
+package bulletdrift;
+
+import bulletdrift.core.GameManager;
 
 import javax.swing.*;
 

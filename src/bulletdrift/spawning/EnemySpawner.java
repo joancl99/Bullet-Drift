@@ -1,4 +1,6 @@
-package Files;
+package bulletdrift.spawning;
+
+import bulletdrift.entities.Enemy;
 
 import java.util.ArrayList;
 import java.util.Random;

@@ -1,9 +1,13 @@
-package Files;
+package bulletdrift.entities;
 
 import java.awt.*;
 import javax.swing.ImageIcon;
 
 public class PowerUps {
+    public static final String TYPE_LIFE = "vida";
+    public static final String TYPE_SHIELD = "escudo";
+    public static final String TYPE_RAPID_FIRE = "disparoRapido";
+
     private static final int WIDTH = 55;
     private static final int HEIGHT = 60;
     private static final double HITBOX_SCALE = 0.70;
@@ -20,13 +24,13 @@ public class PowerUps {
         this.type = type;
 
         switch (type) {
-            case "vida":
+            case TYPE_LIFE:
                 this.powerUpImage = new ImageIcon("Images/1.png").getImage();
                 break;
-            case "escudo":
+            case TYPE_SHIELD:
                 this.powerUpImage = new ImageIcon("Images/2.png").getImage();
                 break;
-            case "disparoRapido":
+            case TYPE_RAPID_FIRE:
                 this.powerUpImage = new ImageIcon("Images/3.png").getImage();
                 break;
             default:

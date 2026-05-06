@@ -3,10 +3,10 @@ setlocal
 
 cd /d "%~dp0"
 
-if not exist out\Files\Main.class (
+if not exist out\bulletdrift\Main.class (
     call build.bat
     if errorlevel 1 exit /b 1
 )
 
-java -cp out Files.Main
+java -cp out bulletdrift.Main
 exit /b %errorlevel%

@@ -1,4 +1,4 @@
-package Files;
+package bulletdrift.entities;
 
 import javax.swing.*;
 import java.awt.*;
@@ -123,6 +123,10 @@ public class Player extends JPanel {
         }
     }
 
+    public void render(Graphics g) {
+        paintComponent(g);
+    }
+
     private void updateMovement() {
         double dx = 0, dy = 0;
 
@@ -244,6 +248,10 @@ public class Player extends JPanel {
             }
         }
         projectiles.removeAll(toRemove);
+    }
+
+    public ArrayList<Projectile> getProjectiles() {
+        return projectiles;
     }
 
     public void setPanelSize(int panelWidth, int panelHeight) {

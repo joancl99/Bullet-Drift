@@ -26,8 +26,8 @@ Desde la raiz del proyecto:
 Tambien se puede hacer manualmente:
 
 ```powershell
-javac -d out src/Files/*.java
-java -cp out Files.Main
+javac -d out src/bulletdrift/Main.java src/bulletdrift/core/*.java src/bulletdrift/entities/*.java src/bulletdrift/rendering/*.java src/bulletdrift/spawning/*.java src/bulletdrift/systems/*.java
+java -cp out bulletdrift.Main
 ```
 
 ## Controles
@@ -64,16 +64,21 @@ Los power-ups tienen feedback visual al recogerse y ya no aparecen en la zona su
 ## Estructura
 
 ```text
-Images/              Recursos graficos
-src/Files/           Codigo fuente Java
-build.bat            Compila el proyecto
-run.bat              Ejecuta el juego
+Images/                      Recursos graficos
+src/bulletdrift/             Clase principal
+src/bulletdrift/core/        Coordinacion principal del juego
+src/bulletdrift/entities/    Entidades jugables
+src/bulletdrift/rendering/   Renderizado de HUD e interfaces
+src/bulletdrift/spawning/    Generacion de entidades
+src/bulletdrift/systems/     Sistemas de reglas de juego
+build.bat                    Compila el proyecto
+run.bat                      Ejecuta el juego
 ```
 
 Clase principal:
 
 ```text
-Files.Main
+bulletdrift.Main
 ```
 
 ## Roadmap

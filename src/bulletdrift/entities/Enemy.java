@@ -1,4 +1,4 @@
-package Files;
+package bulletdrift.entities;
 
 import javax.swing.*;
 import java.awt.*;

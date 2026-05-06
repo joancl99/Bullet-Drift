@@ -1,4 +1,4 @@
-package Files;
+package bulletdrift.entities;
 
 import java.awt.*;
 import javax.swing.ImageIcon;
