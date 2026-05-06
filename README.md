@@ -55,9 +55,20 @@ java -cp out bulletdrift.Main
 
 ## Power-Ups
 
-- `vida`: suma una vida.
+- `vida`: suma una vida extra.
+- `curacion`: cura 20 HP.
 - `escudo`: absorbe una colision con enemigo.
 - `disparoRapido`: aumenta temporalmente la cadencia de disparo.
+- `invulnerabilidad`: evita temporalmente el dano por enemigos.
+- `superVelocidad`: aumenta temporalmente la velocidad del jugador.
+- `bomba`: elimina los enemigos actuales en pantalla.
+- `bombShot`: dispara balas bomba con dano de area.
+- `fireShoot`: dispara proyectiles de fuego mas potentes.
+- `moneda`: suma monedas al contador del HUD.
+- `llave`: preparada para acceso futuro al boss final; no aparece de forma normal todavia.
+- `megaMush`: combina velocidad, invulnerabilidad y disparo rapido.
+- `mysteryBox`: activa un power-up aleatorio.
+- `iman`: atrae los power-ups hacia el jugador.
 
 Los power-ups tienen feedback visual al recogerse y ya no aparecen en la zona superior de la pantalla para evitar situaciones injustas.
 

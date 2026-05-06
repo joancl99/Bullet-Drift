@@ -55,7 +55,7 @@ public class GameManager extends JPanel {
         hudRenderer = new HudRenderer();
         debugHitboxes = false;
         firing = false;
-        backgroundImage = new ImageIcon("Images/fondo1.png").getImage();
+        backgroundImage = new ImageIcon("Images/Wallpaper.png").getImage();
 
         powerUps.add(new PowerUps(180, 330, PowerUps.TYPE_RAPID_FIRE));
 
@@ -134,6 +134,7 @@ public class GameManager extends JPanel {
                 generateEnemies();
                 generatePowerUps();
                 moveEnemies();
+                movePowerUpsToPlayer();
                 player.updateProjectiles(getWidth(), getHeight());
                 checkCollisions();
                 repaint();
@@ -175,6 +176,14 @@ public class GameManager extends JPanel {
         enemies.removeIf(e -> e.getY() > getHeight());
     }
 
+    private void movePowerUpsToPlayer() {
+        if (!player.isMagnetActive()) return;
+
+        for (PowerUps powerUp : powerUps) {
+            powerUp.moveToward(player.getCenterX(), player.getCenterY(), getWidth(), getHeight());
+        }
+    }
+
     private void checkCollisions() {
         CollisionManager.CollisionResult result = collisionManager.checkCollisions(
             player,
@@ -192,6 +201,10 @@ public class GameManager extends JPanel {
 
         if (result.getScoreToAdd() > 0) {
             session.addScore(result.getScoreToAdd());
+        }
+
+        if (result.getCoinsToAdd() > 0) {
+            session.addCoins(result.getCoinsToAdd());
         }
 
         if (result.hasFeedback()) {
@@ -244,6 +257,7 @@ public class GameManager extends JPanel {
             enemies,
             powerUps,
             session.getScore(),
+            session.getCoins(),
             session.getWave(),
             debugHitboxes,
             session.isPaused(),

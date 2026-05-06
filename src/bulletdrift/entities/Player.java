@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 public class Player extends JPanel {
-    private static final double SPEED = 10;
+    private static final double BASE_SPEED = 10;
+    private static final double SPEED_BOOST_MULTIPLIER = 1.7;
     private static final int PROJECTILE_SPEED = 30;
     private static final int PLAYER_BASE_WIDTH = 25;
     private static final int PLAYER_BASE_HEIGHT = 35;
@@ -37,9 +38,17 @@ public class Player extends JPanel {
     private int lives;
     private int health;
     private boolean rapidFire;
+    private boolean speedBoost;
+    private boolean bombShot;
+    private boolean fireShot;
+    private boolean magnetActive;
     private boolean shieldActive;
     private boolean invulnerable;
     private long rapidFireEndTime;
+    private long speedBoostEndTime;
+    private long bombShotEndTime;
+    private long fireShotEndTime;
+    private long magnetEndTime;
     private long shieldEndTime;
     private long invulnerabilityEndTime;
 
@@ -53,7 +62,7 @@ public class Player extends JPanel {
         this.y = (panelHeight - height) / 2;
 
         this.projectiles = new ArrayList<>();
-        this.playerImage = new ImageIcon("Images/loco1.png").getImage();
+        this.playerImage = new ImageIcon("Images/MainCharacter.png").getImage();
         setFocusable(true);
 
         movementTimer = new Timer(MOVEMENT_TIMER_DELAY_MS, e -> updateMovement());
@@ -64,6 +73,10 @@ public class Player extends JPanel {
         lives = INITIAL_LIVES;
         health = MAX_HEALTH;
         rapidFire = false;
+        speedBoost = false;
+        bombShot = false;
+        fireShot = false;
+        magnetActive = false;
         shieldActive = false;
 
         addMouseListener(new MouseAdapter() {
@@ -137,8 +150,9 @@ public class Player extends JPanel {
 
         if (dx != 0 || dy != 0) {
             double length = Math.sqrt(dx * dx + dy * dy);
-            dx = dx / length * SPEED;
-            dy = dy / length * SPEED;
+            double speed = speedBoost ? BASE_SPEED * SPEED_BOOST_MULTIPLIER : BASE_SPEED;
+            dx = dx / length * speed;
+            dy = dy / length * speed;
             x += dx;
             y += dy;
         }
@@ -165,6 +179,22 @@ public class Player extends JPanel {
 
         if (rapidFire && System.currentTimeMillis() > rapidFireEndTime) {
             rapidFire = false;
+        }
+
+        if (speedBoost && System.currentTimeMillis() > speedBoostEndTime) {
+            speedBoost = false;
+        }
+
+        if (bombShot && System.currentTimeMillis() > bombShotEndTime) {
+            bombShot = false;
+        }
+
+        if (fireShot && System.currentTimeMillis() > fireShotEndTime) {
+            fireShot = false;
+        }
+
+        if (magnetActive && System.currentTimeMillis() > magnetEndTime) {
+            magnetActive = false;
         }
 
         if (invulnerable && System.currentTimeMillis() > invulnerabilityEndTime) {
@@ -221,21 +251,28 @@ public class Player extends JPanel {
 
         int speed = PROJECTILE_SPEED;
         boolean projectileCreated = true;
+        Projectile.Type projectileType = getProjectileType();
 
         if (facingUp) 
-            projectiles.add(new Projectile(x + width / 2 - PROJECTILE_SPAWN_OFFSET, y, 0, -speed, currentPanelWidth, currentPanelHeight, "up"));
+            projectiles.add(new Projectile(x + width / 2 - PROJECTILE_SPAWN_OFFSET, y, 0, -speed, currentPanelWidth, currentPanelHeight, "up", projectileType));
         else if (facingDown) 
-            projectiles.add(new Projectile(x + width / 2 - PROJECTILE_SPAWN_OFFSET, y + height, 0, speed, currentPanelWidth, currentPanelHeight, "down"));
+            projectiles.add(new Projectile(x + width / 2 - PROJECTILE_SPAWN_OFFSET, y + height, 0, speed, currentPanelWidth, currentPanelHeight, "down", projectileType));
         else if (facingLeft) 
-            projectiles.add(new Projectile(x, y + height / 2 - PROJECTILE_SPAWN_OFFSET, -speed, 0, currentPanelWidth, currentPanelHeight, "left"));
+            projectiles.add(new Projectile(x, y + height / 2 - PROJECTILE_SPAWN_OFFSET, -speed, 0, currentPanelWidth, currentPanelHeight, "left", projectileType));
         else if (facingRight) 
-            projectiles.add(new Projectile(x + width, y + height / 2 - PROJECTILE_SPAWN_OFFSET, speed, 0, currentPanelWidth, currentPanelHeight, "right"));
+            projectiles.add(new Projectile(x + width, y + height / 2 - PROJECTILE_SPAWN_OFFSET, speed, 0, currentPanelWidth, currentPanelHeight, "right", projectileType));
         else
             projectileCreated = false;
 
         if (projectileCreated) {
             lastShootTime = now;
         }
+    }
+
+    private Projectile.Type getProjectileType() {
+        if (bombShot) return Projectile.Type.BOMB;
+        if (fireShot) return Projectile.Type.FIRE;
+        return Projectile.Type.NORMAL;
     }
 
     public void updateProjectiles(int panelWidth, int panelHeight) {
@@ -323,6 +360,49 @@ public class Player extends JPanel {
         return rapidFire;
     }
 
+    public void activateSpeedBoost(long durationMs) {
+        speedBoost = true;
+        speedBoostEndTime = System.currentTimeMillis() + durationMs;
+    }
+
+    public boolean isSpeedBoost() {
+        return speedBoost;
+    }
+
+    public int getSpeedBoostSecondsLeft() {
+        if (!speedBoost) return 0;
+        return Math.max(0, (int) Math.ceil((speedBoostEndTime - System.currentTimeMillis()) / 1000.0));
+    }
+
+    public void activateBombShot(long durationMs) {
+        bombShot = true;
+        fireShot = false;
+        bombShotEndTime = System.currentTimeMillis() + durationMs;
+    }
+
+    public void activateFireShot(long durationMs) {
+        fireShot = true;
+        bombShot = false;
+        fireShotEndTime = System.currentTimeMillis() + durationMs;
+    }
+
+    public void activateMagnet(long durationMs) {
+        magnetActive = true;
+        magnetEndTime = System.currentTimeMillis() + durationMs;
+    }
+
+    public boolean isMagnetActive() {
+        return magnetActive;
+    }
+
+    public int getCenterX() {
+        return x + width / 2;
+    }
+
+    public int getCenterY() {
+        return y + height / 2;
+    }
+
     public int getRapidFireSecondsLeft() {
         if (!rapidFire) return 0;
         return Math.max(0, (int) Math.ceil((rapidFireEndTime - System.currentTimeMillis()) / 1000.0));
@@ -351,9 +431,17 @@ public class Player extends JPanel {
         lives = INITIAL_LIVES;
         health = MAX_HEALTH;
         rapidFire = false;
+        speedBoost = false;
+        bombShot = false;
+        fireShot = false;
+        magnetActive = false;
         shieldActive = false;
         invulnerable = false;
         rapidFireEndTime = 0;
+        speedBoostEndTime = 0;
+        bombShotEndTime = 0;
+        fireShotEndTime = 0;
+        magnetEndTime = 0;
         shieldEndTime = 0;
         invulnerabilityEndTime = 0;
         lastShootTime = 0;
@@ -366,8 +454,16 @@ public class Player extends JPanel {
     public void resetAfterLifeLost(long invulnerabilityDurationMs) {
         health = MAX_HEALTH;
         rapidFire = false;
+        speedBoost = false;
+        bombShot = false;
+        fireShot = false;
+        magnetActive = false;
         shieldActive = false;
         rapidFireEndTime = 0;
+        speedBoostEndTime = 0;
+        bombShotEndTime = 0;
+        fireShotEndTime = 0;
+        magnetEndTime = 0;
         shieldEndTime = 0;
         lastShootTime = 0;
         projectiles.clear();

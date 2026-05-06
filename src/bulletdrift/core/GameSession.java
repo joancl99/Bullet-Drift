@@ -8,6 +8,7 @@ public class GameSession {
     private static final long WAVE_FEEDBACK_DURATION_MS = 1800;
 
     private int score;
+    private int coins;
     private boolean gameOver;
     private boolean paused;
     private String powerUpFeedbackText;
@@ -23,6 +24,7 @@ public class GameSession {
 
     public void reset() {
         score = 0;
+        coins = 0;
         gameOver = false;
         paused = false;
         powerUpFeedbackText = "";
@@ -40,6 +42,14 @@ public class GameSession {
 
     public int getScore() {
         return score;
+    }
+
+    public void addCoins(int amount) {
+        coins += amount;
+    }
+
+    public int getCoins() {
+        return coins;
     }
 
     public int getWave() {

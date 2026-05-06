@@ -13,6 +13,7 @@ import java.util.Iterator;
 public class CollisionManager {
     private static final int SCORE_PER_ENEMY = 10;
     private static final int ENEMY_COLLISION_DAMAGE = 20;
+    private static final int BOMB_EXPLOSION_RADIUS = 160;
 
     private PowerUpSystem powerUpSystem;
 
@@ -59,10 +60,19 @@ public class CollisionManager {
 
             for (Projectile projectile : new ArrayList<>(player.getProjectiles())) {
                 if (projectile.getHitBox().intersects(enemy.getHitBoxEnemy(panelWidth, panelHeight))) {
-                    player.getProjectiles().remove(projectile);
-                    if (enemy.takeHit()) {
+                    if (projectile.getType() != Projectile.Type.FIRE) {
+                        player.getProjectiles().remove(projectile);
+                    }
+
+                    boolean enemyDestroyed = projectile.getType() == Projectile.Type.FIRE ? enemy.takeHit() || enemy.takeHit() : enemy.takeHit();
+                    if (enemyDestroyed) {
                         enemyIterator.remove();
                         result.addScore(SCORE_PER_ENEMY);
+
+                        if (projectile.getType() == Projectile.Type.BOMB) {
+                            result.addScore(removeEnemiesInExplosion(enemies, enemy, panelWidth, panelHeight) * SCORE_PER_ENEMY);
+                            return result;
+                        }
                     }
                     break;
                 }
@@ -77,6 +87,12 @@ public class CollisionManager {
                 if (feedback != null) {
                     result.setFeedback(feedback.getText(), feedback.getColor());
                 }
+                if (PowerUps.TYPE_BOMB.equals(powerUp.getType())) {
+                    result.addScore(enemies.size() * SCORE_PER_ENEMY);
+                    enemies.clear();
+                } else if (PowerUps.TYPE_COIN.equals(powerUp.getType())) {
+                    result.addCoins(1);
+                }
                 powerUpIterator.remove();
             }
         }
@@ -84,8 +100,31 @@ public class CollisionManager {
         return result;
     }
 
+    private int removeEnemiesInExplosion(ArrayList<Enemy> enemies, Enemy sourceEnemy, int panelWidth, int panelHeight) {
+        Rectangle sourceHitbox = sourceEnemy.getHitBoxEnemy(panelWidth, panelHeight);
+        int sourceX = sourceHitbox.x + sourceHitbox.width / 2;
+        int sourceY = sourceHitbox.y + sourceHitbox.height / 2;
+        int removedCount = 0;
+
+        Iterator<Enemy> iterator = enemies.iterator();
+        while (iterator.hasNext()) {
+            Enemy enemy = iterator.next();
+            Rectangle hitbox = enemy.getHitBoxEnemy(panelWidth, panelHeight);
+            int enemyX = hitbox.x + hitbox.width / 2;
+            int enemyY = hitbox.y + hitbox.height / 2;
+            double distance = Math.hypot(enemyX - sourceX, enemyY - sourceY);
+            if (distance <= BOMB_EXPLOSION_RADIUS) {
+                iterator.remove();
+                removedCount++;
+            }
+        }
+
+        return removedCount;
+    }
+
     public static class CollisionResult {
         private int scoreToAdd;
+        private int coinsToAdd;
         private boolean playerLifeLost;
         private String feedbackText;
         private Color feedbackColor;
@@ -96,6 +135,14 @@ public class CollisionManager {
 
         public int getScoreToAdd() {
             return scoreToAdd;
+        }
+
+        public void addCoins(int coins) {
+            coinsToAdd += coins;
+        }
+
+        public int getCoinsToAdd() {
+            return coinsToAdd;
         }
 
         public boolean isPlayerLifeLost() {

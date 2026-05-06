@@ -5,8 +5,19 @@ import javax.swing.ImageIcon;
 
 public class PowerUps {
     public static final String TYPE_LIFE = "vida";
+    public static final String TYPE_HEALING = "curacion";
     public static final String TYPE_SHIELD = "escudo";
     public static final String TYPE_RAPID_FIRE = "disparoRapido";
+    public static final String TYPE_INVULNERABILITY = "invulnerabilidad";
+    public static final String TYPE_SPEED = "superVelocidad";
+    public static final String TYPE_BOMB = "bomba";
+    public static final String TYPE_BOMB_SHOT = "bombShot";
+    public static final String TYPE_FIRE_SHOT = "fireShoot";
+    public static final String TYPE_COIN = "moneda";
+    public static final String TYPE_KEY = "llave";
+    public static final String TYPE_MEGA_MUSH = "megaMush";
+    public static final String TYPE_MYSTERY_BOX = "mysteryBox";
+    public static final String TYPE_MAGNET = "iman";
 
     private static final int WIDTH = 55;
     private static final int HEIGHT = 60;
@@ -25,16 +36,49 @@ public class PowerUps {
 
         switch (type) {
             case TYPE_LIFE:
-                this.powerUpImage = new ImageIcon("Images/1.png").getImage();
+                this.powerUpImage = new ImageIcon("Images/ExtraLife.png").getImage();
+                break;
+            case TYPE_HEALING:
+                this.powerUpImage = new ImageIcon("Images/Healing.png").getImage();
                 break;
             case TYPE_SHIELD:
-                this.powerUpImage = new ImageIcon("Images/2.png").getImage();
+                this.powerUpImage = new ImageIcon("Images/Shield.png").getImage();
                 break;
             case TYPE_RAPID_FIRE:
-                this.powerUpImage = new ImageIcon("Images/3.png").getImage();
+                this.powerUpImage = new ImageIcon("Images/RapidFire.png").getImage();
+                break;
+            case TYPE_INVULNERABILITY:
+                this.powerUpImage = new ImageIcon("Images/Invulnerability.png").getImage();
+                break;
+            case TYPE_SPEED:
+                this.powerUpImage = new ImageIcon("Images/SuperVelocity.png").getImage();
+                break;
+            case TYPE_BOMB:
+                this.powerUpImage = new ImageIcon("Images/BombShoot.png").getImage();
+                break;
+            case TYPE_BOMB_SHOT:
+                this.powerUpImage = new ImageIcon("Images/BombShoot.png").getImage();
+                break;
+            case TYPE_FIRE_SHOT:
+                this.powerUpImage = new ImageIcon("Images/FireShoot.png").getImage();
+                break;
+            case TYPE_COIN:
+                this.powerUpImage = new ImageIcon("Images/Coin.png").getImage();
+                break;
+            case TYPE_KEY:
+                this.powerUpImage = new ImageIcon("Images/Key.png").getImage();
+                break;
+            case TYPE_MEGA_MUSH:
+                this.powerUpImage = new ImageIcon("Images/MegaMush.png").getImage();
+                break;
+            case TYPE_MYSTERY_BOX:
+                this.powerUpImage = new ImageIcon("Images/MysteryBox.png").getImage();
+                break;
+            case TYPE_MAGNET:
+                this.powerUpImage = new ImageIcon("Images/Magnet.png").getImage();
                 break;
             default:
-                this.powerUpImage = new ImageIcon("Images/4.png").getImage();
+                this.powerUpImage = new ImageIcon("Images/Invulnerability.png").getImage();
         }
     }
 
@@ -83,5 +127,28 @@ public class PowerUps {
 
     public String getType() {
         return type;
+    }
+
+    public int getCenterX(int panelWidth, int panelHeight) {
+        double scale = getPanelScale(panelWidth, panelHeight);
+        return x + getScaledSize(WIDTH, scale) / 2;
+    }
+
+    public int getCenterY(int panelWidth, int panelHeight) {
+        double scale = getPanelScale(panelWidth, panelHeight);
+        return y + getScaledSize(HEIGHT, scale) / 2;
+    }
+
+    public void moveToward(int targetX, int targetY, int panelWidth, int panelHeight) {
+        int centerX = getCenterX(panelWidth, panelHeight);
+        int centerY = getCenterY(panelWidth, panelHeight);
+        double dx = targetX - centerX;
+        double dy = targetY - centerY;
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 1) return;
+
+        double speed = Math.min(18, Math.max(6, distance / 12));
+        x += (int) Math.round(dx / distance * speed);
+        y += (int) Math.round(dy / distance * speed);
     }
 }

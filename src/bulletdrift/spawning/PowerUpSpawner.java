@@ -13,8 +13,18 @@ public class PowerUpSpawner {
 
     private static final String[] POWER_UP_TYPES = {
         PowerUps.TYPE_LIFE,
+        PowerUps.TYPE_HEALING,
         PowerUps.TYPE_SHIELD,
-        PowerUps.TYPE_RAPID_FIRE
+        PowerUps.TYPE_RAPID_FIRE,
+        PowerUps.TYPE_INVULNERABILITY,
+        PowerUps.TYPE_SPEED,
+        PowerUps.TYPE_BOMB,
+        PowerUps.TYPE_BOMB_SHOT,
+        PowerUps.TYPE_FIRE_SHOT,
+        PowerUps.TYPE_COIN,
+        PowerUps.TYPE_MEGA_MUSH,
+        PowerUps.TYPE_MYSTERY_BOX,
+        PowerUps.TYPE_MAGNET
     };
 
     private Random rand;

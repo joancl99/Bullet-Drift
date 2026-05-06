@@ -34,6 +34,7 @@ public class HudRenderer {
         ArrayList<Enemy> enemies,
         ArrayList<PowerUps> powerUps,
         int score,
+        int coins,
         int wave,
         boolean debugHitboxes,
         boolean paused,
@@ -51,17 +52,22 @@ public class HudRenderer {
         g.setFont(new Font("Arial", Font.BOLD, scaleFont(40, panelWidth, panelHeight)));
         g.drawString("Puntos: " + score, hudX, scaleHud(HUD_SCORE_Y, panelWidth, panelHeight));
         g.drawString("Vidas: " + player.getLives(), hudX, scaleHud(HUD_LIVES_Y, panelWidth, panelHeight));
+        g.drawString("Monedas: " + coins, hudX, scaleHud(HUD_POWER_UP_Y, panelWidth, panelHeight));
         drawPlayerHealthBar(g, panelWidth, panelHeight, player);
         drawWaveHud(g, panelWidth, panelHeight, wave);
 
         g.setFont(new Font("Arial", Font.BOLD, scaleFont(28, panelWidth, panelHeight)));
-        int powerUpTextY = scaleHud(HUD_POWER_UP_Y, panelWidth, panelHeight);
+        int powerUpTextY = scaleHud(HUD_POWER_UP_Y + HUD_LINE_HEIGHT, panelWidth, panelHeight);
         if (player.hasShield()) {
             g.drawString("Escudo: " + player.getShieldSecondsLeft() + "s", hudX, powerUpTextY);
             powerUpTextY += hudLineHeight;
         }
         if (player.isRapidFire()) {
             g.drawString("Disparo rapido: " + player.getRapidFireSecondsLeft() + "s", hudX, powerUpTextY);
+            powerUpTextY += hudLineHeight;
+        }
+        if (player.isSpeedBoost()) {
+            g.drawString("Velocidad: " + player.getSpeedBoostSecondsLeft() + "s", hudX, powerUpTextY);
         }
 
         if (debugHitboxes) {

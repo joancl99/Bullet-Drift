@@ -4,6 +4,12 @@ import java.awt.*;
 import javax.swing.ImageIcon;
 
 public class Projectile {
+    public enum Type {
+        NORMAL,
+        BOMB,
+        FIRE
+    }
+
     private static final int BASE_SIZE = 25;
     private static final int DEFAULT_PANEL_WIDTH = 800;
     private static final int DEFAULT_PANEL_HEIGHT = 600;
@@ -15,19 +21,36 @@ public class Projectile {
     private int width, height;
     private Image bulletImage;
     private String direction;
+    private Type type;
 
     public Projectile(double x, double y, double dx, double dy, int panelWidth, int panelHeight, String direction) {
+        this(x, y, dx, dy, panelWidth, panelHeight, direction, Type.NORMAL);
+    }
+
+    public Projectile(double x, double y, double dx, double dy, int panelWidth, int panelHeight, String direction, Type type) {
         this.x = x;
         this.y = y;
         this.dx = dx;
         this.dy = dy;
         this.direction = direction;
-        this.bulletImage = new ImageIcon("Images/bullet.png").getImage();
+        this.type = type;
+        this.bulletImage = new ImageIcon(getImagePath(type)).getImage();
 
         double scaleX = panelWidth / (double) DEFAULT_PANEL_WIDTH;
         double scaleY = panelHeight / (double) DEFAULT_PANEL_HEIGHT;
         width = (int)(BASE_SIZE * scaleX);
         height = (int)(BASE_SIZE * scaleY);
+    }
+
+    private String getImagePath(Type type) {
+        switch (type) {
+            case BOMB:
+                return "Images/BombShoot.png";
+            case FIRE:
+                return "Images/FireShoot.png";
+            default:
+                return "Images/Bullet.png";
+        }
     }
 
     public void move() {
@@ -61,6 +84,10 @@ public class Projectile {
         int hitboxY = (int) y + (height - hitboxHeight) / 2;
 
         return new Rectangle(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
+    }
+
+    public Type getType() {
+        return type;
     }
 
     public int getX() {

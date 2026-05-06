@@ -42,7 +42,7 @@ public class Enemy {
         this.speed = speed;
         this.type = type;
         this.health = getInitialHealth(type);
-        this.enemyImage = new ImageIcon("Images/enemigo.png").getImage();
+        this.enemyImage = new ImageIcon("Images/BugEnemy.png").getImage();
     }
 
     public void moveDownEnemy(int getHeight) {
