@@ -40,6 +40,7 @@ public class GameUpdateSystem {
 
         if (session.isPortalActive()) {
             enemies.clear();
+            powerUps.clear();
         }
 
         if (session.shouldSpawnEnemies()) {

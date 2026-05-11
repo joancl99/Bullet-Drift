@@ -8,6 +8,7 @@ import javax.swing.ImageIcon;
 
 public class Portal {
     private static final int BASE_SIZE = 92;
+    private static final int TOP_MARGIN = 120;
     private static final double HITBOX_SCALE = 0.72;
     private static final int REFERENCE_PANEL_WIDTH = 1920;
     private static final int REFERENCE_PANEL_HEIGHT = 1080;
@@ -17,10 +18,11 @@ public class Portal {
     private Image portalImage;
 
     public Portal(int panelWidth, int panelHeight) {
-        int size = getScaledSize(BASE_SIZE, getPanelScale(panelWidth, panelHeight));
-        this.x = (int) (panelWidth * 0.78) - size / 2;
-        this.y = panelHeight / 2 - size / 2;
-        this.portalImage = new ImageIcon("Images/Magnet.png").getImage();
+        double scale = getPanelScale(panelWidth, panelHeight);
+        int size = getScaledSize(BASE_SIZE, scale);
+        this.x = panelWidth / 2 - size / 2;
+        this.y = getScaledSize(TOP_MARGIN, scale);
+        this.portalImage = new ImageIcon("src/Files/Portal.png").getImage();
     }
 
     public void paint(Graphics g, int panelWidth, int panelHeight) {

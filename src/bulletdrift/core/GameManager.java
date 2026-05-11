@@ -61,7 +61,7 @@ public class GameManager extends JPanel {
         hudRenderer = new HudRenderer();
         debugHitboxes = false;
         firing = false;
-        backgroundImage = new ImageIcon("Images/Wallpaper.png").getImage();
+        backgroundImage = new ImageIcon("src/Files/Wallpaper.png").getImage();
 
         powerUps.add(new PowerUp(180, 330, PowerUp.TYPE_RAPID_FIRE));
 
