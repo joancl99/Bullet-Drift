@@ -75,7 +75,7 @@ Los power-ups tienen feedback visual al recogerse y ya no aparecen en la zona su
 ## Estructura
 
 ```text
-Images/                      Recursos graficos
+Files/                      Recursos graficos
 src/bulletdrift/             Clase principal
 src/bulletdrift/core/        Coordinacion principal del juego
 src/bulletdrift/entities/    Entidades jugables
