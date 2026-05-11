@@ -2,7 +2,7 @@ package bulletdrift.rendering;
 
 import bulletdrift.entities.Enemy;
 import bulletdrift.entities.Player;
-import bulletdrift.entities.PowerUps;
+import bulletdrift.entities.PowerUp;
 import bulletdrift.entities.Projectile;
 
 import java.awt.*;
@@ -32,7 +32,7 @@ public class HudRenderer {
         int panelHeight,
         Player player,
         ArrayList<Enemy> enemies,
-        ArrayList<PowerUps> powerUps,
+        ArrayList<PowerUp> powerUps,
         int score,
         int coins,
         int wave,
@@ -193,7 +193,7 @@ public class HudRenderer {
         g2d.drawString(text, textX, textY);
     }
 
-    private void drawHitboxes(Graphics g, int panelWidth, int panelHeight, Player player, ArrayList<Enemy> enemies, ArrayList<PowerUps> powerUps) {
+    private void drawHitboxes(Graphics g, int panelWidth, int panelHeight, Player player, ArrayList<Enemy> enemies, ArrayList<PowerUp> powerUps) {
         Graphics2D g2d = (Graphics2D) g;
         Stroke previousStroke = g2d.getStroke();
         g2d.setStroke(new BasicStroke(scaleHud(2, panelWidth, panelHeight)));
@@ -215,8 +215,8 @@ public class HudRenderer {
         }
 
         g2d.setColor(Color.CYAN);
-        for (PowerUps powerUp : powerUps) {
-            Rectangle powerUpHitbox = powerUp.getHitBoxPowerUps(panelWidth, panelHeight);
+        for (PowerUp powerUp : powerUps) {
+            Rectangle powerUpHitbox = powerUp.getHitBox(panelWidth, panelHeight);
             g2d.drawRect(powerUpHitbox.x, powerUpHitbox.y, powerUpHitbox.width, powerUpHitbox.height);
         }
 

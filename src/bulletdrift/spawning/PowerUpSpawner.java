@@ -1,6 +1,6 @@
 package bulletdrift.spawning;
 
-import bulletdrift.entities.PowerUps;
+import bulletdrift.entities.PowerUp;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -12,19 +12,19 @@ public class PowerUpSpawner {
     private static final int POWER_UP_TOP_MARGIN = 220;
 
     private static final String[] POWER_UP_TYPES = {
-        PowerUps.TYPE_LIFE,
-        PowerUps.TYPE_HEALING,
-        PowerUps.TYPE_SHIELD,
-        PowerUps.TYPE_RAPID_FIRE,
-        PowerUps.TYPE_INVULNERABILITY,
-        PowerUps.TYPE_SPEED,
-        PowerUps.TYPE_BOMB,
-        PowerUps.TYPE_BOMB_SHOT,
-        PowerUps.TYPE_FIRE_SHOT,
-        PowerUps.TYPE_COIN,
-        PowerUps.TYPE_MEGA_MUSH,
-        PowerUps.TYPE_MYSTERY_BOX,
-        PowerUps.TYPE_MAGNET
+        PowerUp.TYPE_LIFE,
+        PowerUp.TYPE_HEALING,
+        PowerUp.TYPE_SHIELD,
+        PowerUp.TYPE_RAPID_FIRE,
+        PowerUp.TYPE_INVULNERABILITY,
+        PowerUp.TYPE_SPEED,
+        PowerUp.TYPE_BOMB,
+        PowerUp.TYPE_BOMB_SHOT,
+        PowerUp.TYPE_FIRE_SHOT,
+        PowerUp.TYPE_COIN,
+        PowerUp.TYPE_MEGA_MUSH,
+        PowerUp.TYPE_MYSTERY_BOX,
+        PowerUp.TYPE_MAGNET
     };
 
     private Random rand;
@@ -33,7 +33,7 @@ public class PowerUpSpawner {
         this.rand = rand;
     }
 
-    public void generatePowerUp(ArrayList<PowerUps> powerUps, int panelWidth, int panelHeight) {
+    public void generatePowerUp(ArrayList<PowerUp> powerUps, int panelWidth, int panelHeight) {
         if (panelWidth <= POWER_UP_SPAWN_MARGIN || panelHeight <= POWER_UP_TOP_MARGIN + POWER_UP_SPAWN_MARGIN) return;
         if (powerUps.size() >= MAX_POWER_UPS || rand.nextInt(POWER_UP_SPAWN_CHANCE) != 0) return;
 
@@ -42,6 +42,6 @@ public class PowerUpSpawner {
         int y = POWER_UP_TOP_MARGIN + rand.nextInt(availableHeight);
         String type = POWER_UP_TYPES[rand.nextInt(POWER_UP_TYPES.length)];
 
-        powerUps.add(new PowerUps(x, y, type));
+        powerUps.add(new PowerUp(x, y, type));
     }
 }

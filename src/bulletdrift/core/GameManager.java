@@ -2,12 +2,15 @@ package bulletdrift.core;
 
 import bulletdrift.entities.Enemy;
 import bulletdrift.entities.Player;
-import bulletdrift.entities.PowerUps;
+import bulletdrift.entities.PowerUp;
+import bulletdrift.rendering.GameRenderer;
 import bulletdrift.rendering.HudRenderer;
 import bulletdrift.spawning.EnemySpawner;
 import bulletdrift.spawning.PowerUpSpawner;
 import bulletdrift.systems.CollisionManager;
+import bulletdrift.systems.GameUpdateSystem;
 import bulletdrift.systems.PowerUpSystem;
+import bulletdrift.systems.MovementSystem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,11 +28,10 @@ public class GameManager extends JPanel {
     private static final long DAMAGE_INVULNERABILITY_MS = 1000;
     private Player player;
     private ArrayList<Enemy> enemies;
-    private ArrayList<PowerUps> powerUps;
+    private ArrayList<PowerUp> powerUps;
     private GameSession session;
-    private EnemySpawner enemySpawner;
-    private PowerUpSpawner powerUpSpawner;
-    private CollisionManager collisionManager;
+    private GameUpdateSystem gameUpdateSystem;
+    private GameRenderer gameRenderer;
     private HudRenderer hudRenderer;
     private boolean debugHitboxes;
     private boolean firing;
@@ -49,15 +51,19 @@ public class GameManager extends JPanel {
         powerUps = new ArrayList<>();
         session = new GameSession();
         Random rand = new Random();
-        enemySpawner = new EnemySpawner(rand);
-        powerUpSpawner = new PowerUpSpawner(rand);
-        collisionManager = new CollisionManager(new PowerUpSystem());
+        gameUpdateSystem = new GameUpdateSystem(
+            new EnemySpawner(rand),
+            new PowerUpSpawner(rand),
+            new MovementSystem(),
+            new CollisionManager(new PowerUpSystem())
+        );
+        gameRenderer = new GameRenderer();
         hudRenderer = new HudRenderer();
         debugHitboxes = false;
         firing = false;
         backgroundImage = new ImageIcon("Images/Wallpaper.png").getImage();
 
-        powerUps.add(new PowerUps(180, 330, PowerUps.TYPE_RAPID_FIRE));
+        powerUps.add(new PowerUp(180, 330, PowerUp.TYPE_RAPID_FIRE));
 
         this.addComponentListener(new ComponentAdapter() {
             @Override
@@ -131,12 +137,18 @@ public class GameManager extends JPanel {
                 if (firing) {
                     player.shoot();
                 }
-                generateEnemies();
-                generatePowerUps();
-                moveEnemies();
-                movePowerUpsToPlayer();
-                player.updateProjectiles(getWidth(), getHeight());
-                checkCollisions();
+                boolean playerLifeLost = gameUpdateSystem.update(
+                    player,
+                    enemies,
+                    powerUps,
+                    session,
+                    getWidth(),
+                    getHeight(),
+                    DAMAGE_INVULNERABILITY_MS
+                );
+                if (playerLifeLost) {
+                    handlePlayerLifeLost();
+                }
                 repaint();
             }
         });
@@ -159,57 +171,6 @@ public class GameManager extends JPanel {
         width = Math.max(MIN_PANEL_WIDTH, width);
         height = Math.max(MIN_PANEL_HEIGHT, height);
         return new Dimension(width, height);
-    }
-
-    private void generateEnemies() {
-        enemySpawner.generateEnemy(enemies, getWidth(), session.getWave());
-    }
-
-    private void generatePowerUps() {
-        powerUpSpawner.generatePowerUp(powerUps, getWidth(), getHeight());
-    }
-
-    private void moveEnemies() {
-        for (Enemy enemy : enemies) {
-            enemy.moveDownEnemy(getHeight());
-        }
-        enemies.removeIf(e -> e.getY() > getHeight());
-    }
-
-    private void movePowerUpsToPlayer() {
-        if (!player.isMagnetActive()) return;
-
-        for (PowerUps powerUp : powerUps) {
-            powerUp.moveToward(player.getCenterX(), player.getCenterY(), getWidth(), getHeight());
-        }
-    }
-
-    private void checkCollisions() {
-        CollisionManager.CollisionResult result = collisionManager.checkCollisions(
-            player,
-            enemies,
-            powerUps,
-            getWidth(),
-            getHeight(),
-            DAMAGE_INVULNERABILITY_MS
-        );
-
-        if (result.isPlayerLifeLost()) {
-            handlePlayerLifeLost();
-            return;
-        }
-
-        if (result.getScoreToAdd() > 0) {
-            session.addScore(result.getScoreToAdd());
-        }
-
-        if (result.getCoinsToAdd() > 0) {
-            session.addCoins(result.getCoinsToAdd());
-        }
-
-        if (result.hasFeedback()) {
-            session.showPowerUpFeedback(result.getFeedbackText(), result.getFeedbackColor());
-        }
     }
 
     private void handlePlayerLifeLost() {
@@ -235,19 +196,7 @@ public class GameManager extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
-
-        player.render(g);
-
-
-        for (Enemy enemy : enemies) {
-            enemy.paint(g, getWidth(), getHeight());
-        }
-
-        for (PowerUps powerUp : powerUps) {
-            powerUp.paint(g, false, getWidth(), getHeight());
-        }
-
+        gameRenderer.drawScene(g, getWidth(), getHeight(), backgroundImage, this, player, enemies, powerUps);
 
         hudRenderer.draw(
             g,

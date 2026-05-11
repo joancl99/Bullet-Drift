@@ -3,7 +3,7 @@ package bulletdrift.entities;
 import java.awt.*;
 import javax.swing.ImageIcon;
 
-public class PowerUps {
+public class PowerUp {
     public static final String TYPE_LIFE = "vida";
     public static final String TYPE_HEALING = "curacion";
     public static final String TYPE_SHIELD = "escudo";
@@ -29,7 +29,7 @@ public class PowerUps {
     private Image powerUpImage;
     private String type;
 
-    public PowerUps(int x, int y, String type) {
+    public PowerUp(int x, int y, String type) {
         this.x = x;
         this.y = y;
         this.type = type;
@@ -90,7 +90,7 @@ public class PowerUps {
 
         if (debug) {
             g.setColor(Color.RED);
-            Rectangle hitBox = getHitBoxPowerUps(panelWidth, panelHeight);
+            Rectangle hitBox = getHitBox(panelWidth, panelHeight);
             g.drawRect(hitBox.x, hitBox.y, hitBox.width, hitBox.height);
         }
     }
@@ -99,7 +99,7 @@ public class PowerUps {
         paint(g, debug, REFERENCE_PANEL_WIDTH, REFERENCE_PANEL_HEIGHT);
     }
 
-    public Rectangle getHitBoxPowerUps(int panelWidth, int panelHeight) {
+    public Rectangle getHitBox(int panelWidth, int panelHeight) {
         double scale = getPanelScale(panelWidth, panelHeight);
         int width = getScaledSize(WIDTH, scale);
         int height = getScaledSize(HEIGHT, scale);
@@ -111,8 +111,8 @@ public class PowerUps {
         return new Rectangle(hitboxX, hitboxY, hitboxWidth, hitboxHeight);
     }
 
-    public Rectangle getHitBoxPowerUps() {
-        return getHitBoxPowerUps(REFERENCE_PANEL_WIDTH, REFERENCE_PANEL_HEIGHT);
+    public Rectangle getHitBox() {
+        return getHitBox(REFERENCE_PANEL_WIDTH, REFERENCE_PANEL_HEIGHT);
     }
 
     private double getPanelScale(int panelWidth, int panelHeight) {

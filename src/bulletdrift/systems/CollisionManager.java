@@ -2,7 +2,7 @@ package bulletdrift.systems;
 
 import bulletdrift.entities.Enemy;
 import bulletdrift.entities.Player;
-import bulletdrift.entities.PowerUps;
+import bulletdrift.entities.PowerUp;
 import bulletdrift.entities.Projectile;
 
 import java.awt.Color;
@@ -24,7 +24,7 @@ public class CollisionManager {
     public CollisionResult checkCollisions(
         Player player,
         ArrayList<Enemy> enemies,
-        ArrayList<PowerUps> powerUps,
+        ArrayList<PowerUp> powerUps,
         int panelWidth,
         int panelHeight,
         long damageInvulnerabilityMs
@@ -79,18 +79,18 @@ public class CollisionManager {
             }
         }
 
-        Iterator<PowerUps> powerUpIterator = powerUps.iterator();
+        Iterator<PowerUp> powerUpIterator = powerUps.iterator();
         while (powerUpIterator.hasNext()) {
-            PowerUps powerUp = powerUpIterator.next();
-            if (playerHitbox.intersects(powerUp.getHitBoxPowerUps(panelWidth, panelHeight))) {
+            PowerUp powerUp = powerUpIterator.next();
+            if (playerHitbox.intersects(powerUp.getHitBox(panelWidth, panelHeight))) {
                 PowerUpSystem.PowerUpFeedback feedback = powerUpSystem.apply(powerUp, player);
                 if (feedback != null) {
                     result.setFeedback(feedback.getText(), feedback.getColor());
                 }
-                if (PowerUps.TYPE_BOMB.equals(powerUp.getType())) {
+                if (PowerUp.TYPE_BOMB.equals(powerUp.getType())) {
                     result.addScore(enemies.size() * SCORE_PER_ENEMY);
                     enemies.clear();
-                } else if (PowerUps.TYPE_COIN.equals(powerUp.getType())) {
+                } else if (PowerUp.TYPE_COIN.equals(powerUp.getType())) {
                     result.addCoins(1);
                 }
                 powerUpIterator.remove();
