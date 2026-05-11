@@ -87,12 +87,6 @@ public class CollisionManager {
                 if (feedback != null) {
                     result.setFeedback(feedback.getText(), feedback.getColor());
                 }
-                if (PowerUp.TYPE_BOMB.equals(powerUp.getType())) {
-                    result.addScore(enemies.size() * SCORE_PER_ENEMY);
-                    enemies.clear();
-                } else if (PowerUp.TYPE_COIN.equals(powerUp.getType())) {
-                    result.addCoins(1);
-                }
                 powerUpIterator.remove();
             }
         }
@@ -124,7 +118,6 @@ public class CollisionManager {
 
     public static class CollisionResult {
         private int scoreToAdd;
-        private int coinsToAdd;
         private boolean playerLifeLost;
         private String feedbackText;
         private Color feedbackColor;
@@ -135,14 +128,6 @@ public class CollisionManager {
 
         public int getScoreToAdd() {
             return scoreToAdd;
-        }
-
-        public void addCoins(int coins) {
-            coinsToAdd += coins;
-        }
-
-        public int getCoinsToAdd() {
-            return coinsToAdd;
         }
 
         public boolean isPlayerLifeLost() {

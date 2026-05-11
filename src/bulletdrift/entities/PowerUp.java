@@ -10,10 +10,8 @@ public class PowerUp {
     public static final String TYPE_RAPID_FIRE = "disparoRapido";
     public static final String TYPE_INVULNERABILITY = "invulnerabilidad";
     public static final String TYPE_SPEED = "superVelocidad";
-    public static final String TYPE_BOMB = "bomba";
     public static final String TYPE_BOMB_SHOT = "bombShot";
     public static final String TYPE_FIRE_SHOT = "fireShoot";
-    public static final String TYPE_COIN = "moneda";
     public static final String TYPE_KEY = "llave";
     public static final String TYPE_MEGA_MUSH = "megaMush";
     public static final String TYPE_MYSTERY_BOX = "mysteryBox";
@@ -53,17 +51,11 @@ public class PowerUp {
             case TYPE_SPEED:
                 this.powerUpImage = new ImageIcon("Images/SuperVelocity.png").getImage();
                 break;
-            case TYPE_BOMB:
-                this.powerUpImage = new ImageIcon("Images/BombShoot.png").getImage();
-                break;
             case TYPE_BOMB_SHOT:
                 this.powerUpImage = new ImageIcon("Images/BombShoot.png").getImage();
                 break;
             case TYPE_FIRE_SHOT:
                 this.powerUpImage = new ImageIcon("Images/FireShoot.png").getImage();
-                break;
-            case TYPE_COIN:
-                this.powerUpImage = new ImageIcon("Images/Coin.png").getImage();
                 break;
             case TYPE_KEY:
                 this.powerUpImage = new ImageIcon("Images/Key.png").getImage();

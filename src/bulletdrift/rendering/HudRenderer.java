@@ -34,7 +34,6 @@ public class HudRenderer {
         ArrayList<Enemy> enemies,
         ArrayList<PowerUp> powerUps,
         int score,
-        int coins,
         int wave,
         boolean debugHitboxes,
         boolean paused,
@@ -52,7 +51,6 @@ public class HudRenderer {
         g.setFont(new Font("Arial", Font.BOLD, scaleFont(40, panelWidth, panelHeight)));
         g.drawString("Puntos: " + score, hudX, scaleHud(HUD_SCORE_Y, panelWidth, panelHeight));
         g.drawString("Vidas: " + player.getLives(), hudX, scaleHud(HUD_LIVES_Y, panelWidth, panelHeight));
-        g.drawString("Monedas: " + coins, hudX, scaleHud(HUD_POWER_UP_Y, panelWidth, panelHeight));
         drawPlayerHealthBar(g, panelWidth, panelHeight, player);
         drawWaveHud(g, panelWidth, panelHeight, wave);
 
@@ -68,6 +66,10 @@ public class HudRenderer {
         }
         if (player.isSpeedBoost()) {
             g.drawString("Velocidad: " + player.getSpeedBoostSecondsLeft() + "s", hudX, powerUpTextY);
+            powerUpTextY += hudLineHeight;
+        }
+        if (player.isMagnetActive()) {
+            g.drawString("Iman: " + player.getMagnetSecondsLeft() + "s", hudX, powerUpTextY);
         }
 
         if (debugHitboxes) {

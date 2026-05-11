@@ -206,7 +206,6 @@ public class GameManager extends JPanel {
             enemies,
             powerUps,
             session.getScore(),
-            session.getCoins(),
             session.getWave(),
             debugHitboxes,
             session.isPaused(),

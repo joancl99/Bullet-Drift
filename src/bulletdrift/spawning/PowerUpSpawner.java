@@ -11,21 +11,20 @@ public class PowerUpSpawner {
     private static final int POWER_UP_SPAWN_MARGIN = 50;
     private static final int POWER_UP_TOP_MARGIN = 220;
 
-    private static final String[] POWER_UP_TYPES = {
-        PowerUp.TYPE_LIFE,
-        PowerUp.TYPE_HEALING,
-        PowerUp.TYPE_SHIELD,
-        PowerUp.TYPE_RAPID_FIRE,
-        PowerUp.TYPE_INVULNERABILITY,
-        PowerUp.TYPE_SPEED,
-        PowerUp.TYPE_BOMB,
-        PowerUp.TYPE_BOMB_SHOT,
-        PowerUp.TYPE_FIRE_SHOT,
-        PowerUp.TYPE_COIN,
-        PowerUp.TYPE_MEGA_MUSH,
-        PowerUp.TYPE_MYSTERY_BOX,
-        PowerUp.TYPE_MAGNET
+    private static final WeightedPowerUp[] POWER_UP_TABLE = {
+        new WeightedPowerUp(PowerUp.TYPE_HEALING, 25),
+        new WeightedPowerUp(PowerUp.TYPE_SPEED, 18),
+        new WeightedPowerUp(PowerUp.TYPE_RAPID_FIRE, 14),
+        new WeightedPowerUp(PowerUp.TYPE_SHIELD, 13),
+        new WeightedPowerUp(PowerUp.TYPE_MAGNET, 10),
+        new WeightedPowerUp(PowerUp.TYPE_BOMB_SHOT, 8),
+        new WeightedPowerUp(PowerUp.TYPE_FIRE_SHOT, 6),
+        new WeightedPowerUp(PowerUp.TYPE_INVULNERABILITY, 3),
+        new WeightedPowerUp(PowerUp.TYPE_LIFE, 3),
+        new WeightedPowerUp(PowerUp.TYPE_MYSTERY_BOX, 1),
+        new WeightedPowerUp(PowerUp.TYPE_MEGA_MUSH, 1)
     };
+    private static final int TOTAL_POWER_UP_WEIGHT = calculateTotalPowerUpWeight();
 
     private Random rand;
 
@@ -40,8 +39,40 @@ public class PowerUpSpawner {
         int x = rand.nextInt(panelWidth - POWER_UP_SPAWN_MARGIN);
         int availableHeight = Math.max(1, panelHeight - POWER_UP_TOP_MARGIN - POWER_UP_SPAWN_MARGIN);
         int y = POWER_UP_TOP_MARGIN + rand.nextInt(availableHeight);
-        String type = POWER_UP_TYPES[rand.nextInt(POWER_UP_TYPES.length)];
+        String type = getRandomPowerUpType();
 
         powerUps.add(new PowerUp(x, y, type));
+    }
+
+    private String getRandomPowerUpType() {
+        int roll = rand.nextInt(TOTAL_POWER_UP_WEIGHT);
+        int accumulatedWeight = 0;
+
+        for (WeightedPowerUp powerUp : POWER_UP_TABLE) {
+            accumulatedWeight += powerUp.weight;
+            if (roll < accumulatedWeight) {
+                return powerUp.type;
+            }
+        }
+
+        return PowerUp.TYPE_HEALING;
+    }
+
+    private static int calculateTotalPowerUpWeight() {
+        int totalWeight = 0;
+        for (WeightedPowerUp powerUp : POWER_UP_TABLE) {
+            totalWeight += powerUp.weight;
+        }
+        return totalWeight;
+    }
+
+    private static class WeightedPowerUp {
+        private String type;
+        private int weight;
+
+        private WeightedPowerUp(String type, int weight) {
+            this.type = type;
+            this.weight = weight;
+        }
     }
 }

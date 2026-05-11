@@ -64,10 +64,6 @@ public class GameUpdateSystem {
             session.addScore(result.getScoreToAdd());
         }
 
-        if (result.getCoinsToAdd() > 0) {
-            session.addCoins(result.getCoinsToAdd());
-        }
-
         if (result.hasFeedback()) {
             session.showPowerUpFeedback(result.getFeedbackText(), result.getFeedbackColor());
         }

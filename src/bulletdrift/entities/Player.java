@@ -12,7 +12,7 @@ public class Player extends JPanel {
     private static final int PROJECTILE_SPEED = 30;
     private static final int PLAYER_BASE_WIDTH = 25;
     private static final int PLAYER_BASE_HEIGHT = 35;
-    private static final int INITIAL_LIVES = 3;
+    private static final int INITIAL_LIVES = 1;
     private static final int MAX_HEALTH = 60;
     private static final int MOVEMENT_TIMER_DELAY_MS = 16;
     private static final int NORMAL_SHOOT_COOLDOWN_MS = 550;
@@ -392,7 +392,15 @@ public class Player extends JPanel {
     }
 
     public boolean isMagnetActive() {
+        if (magnetActive && System.currentTimeMillis() > magnetEndTime) {
+            magnetActive = false;
+        }
         return magnetActive;
+    }
+
+    public int getMagnetSecondsLeft() {
+        if (!isMagnetActive()) return 0;
+        return Math.max(0, (int) Math.ceil((magnetEndTime - System.currentTimeMillis()) / 1000.0));
     }
 
     public int getCenterX() {

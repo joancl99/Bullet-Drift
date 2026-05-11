@@ -13,7 +13,7 @@ public class PowerUpSystem {
     private static final long SPEED_BOOST_DURATION_MS = 5000;
     private static final long BOMB_SHOT_DURATION_MS = 6000;
     private static final long FIRE_SHOT_DURATION_MS = 5000;
-    private static final long MAGNET_DURATION_MS = 8000;
+    private static final long MAGNET_DURATION_MS = 10000;
     private static final int LIFE_POWER_UP_HEAL_AMOUNT = 20;
     private static final String[] MYSTERY_TYPES = {
         PowerUp.TYPE_HEALING,
@@ -48,16 +48,12 @@ public class PowerUpSystem {
             case PowerUp.TYPE_SPEED:
                 player.activateSpeedBoost(SPEED_BOOST_DURATION_MS);
                 return new PowerUpFeedback("SUPER VELOCIDAD", new Color(80, 220, 255));
-            case PowerUp.TYPE_BOMB:
-                return new PowerUpFeedback("BOMBA", new Color(255, 120, 60));
             case PowerUp.TYPE_BOMB_SHOT:
                 player.activateBombShot(BOMB_SHOT_DURATION_MS);
                 return new PowerUpFeedback("BALAS BOMBA", new Color(255, 120, 60));
             case PowerUp.TYPE_FIRE_SHOT:
                 player.activateFireShot(FIRE_SHOT_DURATION_MS);
                 return new PowerUpFeedback("LANZALLAMAS", new Color(255, 80, 40));
-            case PowerUp.TYPE_COIN:
-                return new PowerUpFeedback("+1 MONEDA", new Color(255, 220, 80));
             case PowerUp.TYPE_KEY:
                 return new PowerUpFeedback("LLAVE", new Color(180, 220, 255));
             case PowerUp.TYPE_MEGA_MUSH:
