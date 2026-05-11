@@ -1,5 +1,6 @@
 package bulletdrift.systems;
 
+import bulletdrift.entities.Boss;
 import bulletdrift.entities.Enemy;
 import bulletdrift.entities.KeyObjective;
 import bulletdrift.entities.Player;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class CollisionManager {
-    private static final int SCORE_PER_ENEMY = 10;
+    private static final int SCORE_PER_ENEMY = 600;
     private static final int ENEMY_COLLISION_DAMAGE = 20;
     private static final int BOMB_EXPLOSION_RADIUS = 160;
 
@@ -29,6 +30,7 @@ public class CollisionManager {
         ArrayList<PowerUp> powerUps,
         KeyObjective keyObjective,
         Portal portal,
+        Boss boss,
         boolean portalActive,
         boolean keyCollected,
         int panelWidth,
@@ -124,6 +126,19 @@ public class CollisionManager {
             result.setFeedback("PORTAL LISTO", new Color(180, 120, 255));
         }
 
+        if (boss != null && !boss.isDefeated()) {
+            for (Projectile projectile : new ArrayList<>(player.getProjectiles())) {
+                if (projectile.getHitBox().intersects(boss.getHitBox(panelWidth, panelHeight))) {
+                    player.getProjectiles().remove(projectile);
+                    boss.takeProjectileHit();
+                    if (boss.isDefeated()) {
+                        result.setBossDefeated(true);
+                    }
+                    break;
+                }
+            }
+        }
+
         return result;
     }
 
@@ -155,6 +170,7 @@ public class CollisionManager {
         private boolean keyDestroyed;
         private boolean keyCollected;
         private boolean portalUsed;
+        private boolean bossDefeated;
         private String feedbackText;
         private Color feedbackColor;
 
@@ -196,6 +212,14 @@ public class CollisionManager {
 
         public void setPortalUsed(boolean portalUsed) {
             this.portalUsed = portalUsed;
+        }
+
+        public boolean isBossDefeated() {
+            return bossDefeated;
+        }
+
+        public void setBossDefeated(boolean bossDefeated) {
+            this.bossDefeated = bossDefeated;
         }
 
         public void setFeedback(String feedbackText, Color feedbackColor) {

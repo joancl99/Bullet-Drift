@@ -1,5 +1,6 @@
 package bulletdrift.core;
 
+import bulletdrift.entities.Boss;
 import bulletdrift.entities.KeyObjective;
 import bulletdrift.entities.Portal;
 
@@ -27,8 +28,10 @@ public class GameSession {
     private long waveFeedbackEndTime;
     private KeyObjective keyObjective;
     private Portal portal;
+    private Boss boss;
     private boolean keyCollected;
     private boolean portalUsed;
+    private boolean bossDefeated;
     private boolean waveChanged;
 
     public GameSession() {
@@ -47,8 +50,10 @@ public class GameSession {
         waveFeedbackEndTime = 0;
         keyObjective = null;
         portal = null;
+        boss = null;
         keyCollected = false;
         portalUsed = false;
+        bossDefeated = false;
         waveChanged = false;
     }
 
@@ -113,7 +118,7 @@ public class GameSession {
     }
 
     public boolean shouldSpawnEnemies() {
-        return portal == null;
+        return portal == null && boss == null;
     }
 
     public boolean hasDefendableKey() {
@@ -132,6 +137,14 @@ public class GameSession {
         return portalUsed ? null : portal;
     }
 
+    public Boss getBoss() {
+        return bossDefeated ? null : boss;
+    }
+
+    public boolean isBossActive() {
+        return boss != null && !bossDefeated;
+    }
+
     public boolean hasKeyCollected() {
         return keyCollected;
     }
@@ -141,8 +154,15 @@ public class GameSession {
         keyObjective = null;
     }
 
-    public void usePortal() {
+    public void usePortal(int panelWidth, int panelHeight) {
         portalUsed = true;
+        boss = new Boss(panelWidth, panelHeight);
+        showPowerUpFeedback("BOSS FINAL", new Color(225, 205, 155));
+    }
+
+    public void defeatBoss() {
+        bossDefeated = true;
+        showPowerUpFeedback("VICTORIA", new Color(225, 205, 155));
     }
 
     public void setScore(int score) {

@@ -36,6 +36,7 @@ public class GameManager extends JPanel {
     private boolean debugHitboxes;
     private boolean firing;
     private Image backgroundImage;
+    private Image bossBackgroundImage;
 
     public GameManager() {
         Dimension initialPanelSize = getInitialPanelSize();
@@ -62,6 +63,7 @@ public class GameManager extends JPanel {
         debugHitboxes = false;
         firing = false;
         backgroundImage = new ImageIcon("src/Files/Wallpaper.png").getImage();
+        bossBackgroundImage = new ImageIcon("src/Files/WallpaperBoss.png").getImage();
 
         powerUps.add(new PowerUp(180, 330, PowerUp.TYPE_RAPID_FIRE));
 
@@ -205,13 +207,14 @@ public class GameManager extends JPanel {
             g,
             getWidth(),
             getHeight(),
-            backgroundImage,
+            session.isBossActive() ? bossBackgroundImage : backgroundImage,
             this,
             player,
             enemies,
             powerUps,
             session.getKeyObjective(),
-            session.getPortal()
+            session.getPortal(),
+            session.getBoss()
         );
 
         hudRenderer.draw(

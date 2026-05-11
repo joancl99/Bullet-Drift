@@ -1,5 +1,6 @@
 package bulletdrift.rendering;
 
+import bulletdrift.entities.Boss;
 import bulletdrift.entities.Enemy;
 import bulletdrift.entities.KeyObjective;
 import bulletdrift.entities.Player;
@@ -22,9 +23,15 @@ public class GameRenderer {
         ArrayList<Enemy> enemies,
         ArrayList<PowerUp> powerUps,
         KeyObjective keyObjective,
-        Portal portal
+        Portal portal,
+        Boss boss
     ) {
         g.drawImage(backgroundImage, 0, 0, panelWidth, panelHeight, imageObserver);
+
+        if (boss != null) {
+            boss.paint(g, panelWidth, panelHeight);
+        }
+
         player.render(g);
 
         for (Enemy enemy : enemies) {
@@ -41,6 +48,10 @@ public class GameRenderer {
 
         if (portal != null) {
             portal.paint(g, panelWidth, panelHeight);
+        }
+
+        if (boss != null) {
+            boss.paintHealthBar(g, panelWidth, panelHeight);
         }
     }
 }

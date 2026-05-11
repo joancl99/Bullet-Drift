@@ -58,6 +58,7 @@ public class GameUpdateSystem {
             powerUps,
             session.getKeyObjective(),
             session.getPortal(),
+            session.getBoss(),
             session.isPortalActive(),
             session.hasKeyCollected(),
             panelWidth,
@@ -73,11 +74,17 @@ public class GameUpdateSystem {
             return UpdateResult.keyDestroyed();
         }
 
-        applyCollisionResult(result, session, enemies);
+        applyCollisionResult(result, session, enemies, panelWidth, panelHeight);
         return UpdateResult.none();
     }
 
-    private void applyCollisionResult(CollisionManager.CollisionResult result, GameSession session, ArrayList<Enemy> enemies) {
+    private void applyCollisionResult(
+        CollisionManager.CollisionResult result,
+        GameSession session,
+        ArrayList<Enemy> enemies,
+        int panelWidth,
+        int panelHeight
+    ) {
         if (result.getScoreToAdd() > 0) {
             session.addScore(result.getScoreToAdd());
         }
@@ -95,7 +102,11 @@ public class GameUpdateSystem {
         }
 
         if (result.isPortalUsed()) {
-            session.usePortal();
+            session.usePortal(panelWidth, panelHeight);
+        }
+
+        if (result.isBossDefeated()) {
+            session.defeatBoss();
         }
     }
 
