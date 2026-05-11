@@ -7,7 +7,8 @@ public class Enemy {
     public enum Type {
         NORMAL,
         FAST,
-        TANK
+        TANK,
+        KEY_HUNTER
     }
 
     private static final int NORMAL_IMAGE_SIZE = 90;
@@ -21,9 +22,14 @@ public class Enemy {
     private static final int TANK_HITBOX_WIDTH = 62;
     private static final int TANK_HITBOX_HEIGHT = 78;
     private static final int TANK_OUTLINE_WIDTH = 4;
+    private static final int KEY_HUNTER_IMAGE_SIZE = 78;
+    private static final int KEY_HUNTER_HITBOX_WIDTH = 38;
+    private static final int KEY_HUNTER_HITBOX_HEIGHT = 50;
+    private static final int KEY_HUNTER_OUTLINE_WIDTH = 4;
     private static final int NORMAL_HEALTH = 1;
     private static final int FAST_HEALTH = 1;
     private static final int TANK_HEALTH = 3;
+    private static final int KEY_HUNTER_HEALTH = 1;
     private static final int REFERENCE_PANEL_WIDTH = 1920;
     private static final int REFERENCE_PANEL_HEIGHT = 1080;
 
@@ -49,6 +55,18 @@ public class Enemy {
         y += speed;
     }
 
+    public void moveToward(int targetX, int targetY, int panelWidth, int panelHeight) {
+        int centerX = getCenterX(panelWidth, panelHeight);
+        int centerY = getCenterY(panelWidth, panelHeight);
+        double dx = targetX - centerX;
+        double dy = targetY - centerY;
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 1) return;
+
+        x += (int) Math.round(dx / distance * speed);
+        y += (int) Math.round(dy / distance * speed);
+    }
+
     public void paint(Graphics g, int panelWidth, int panelHeight) {
         double scale = getPanelScale(panelWidth, panelHeight);
         int imageSize = getScaledSize(getImageSize(), scale);
@@ -67,6 +85,13 @@ public class Enemy {
             g2d.setStroke(new BasicStroke(getScaledSize(TANK_OUTLINE_WIDTH, scale)));
             g2d.setColor(new Color(170, 90, 255));
             g2d.drawRect(x, y, imageSize, imageSize);
+            g2d.setStroke(previousStroke);
+        } else if (type == Type.KEY_HUNTER) {
+            Graphics2D g2d = (Graphics2D) g;
+            Stroke previousStroke = g2d.getStroke();
+            g2d.setStroke(new BasicStroke(getScaledSize(KEY_HUNTER_OUTLINE_WIDTH, scale)));
+            g2d.setColor(new Color(255, 60, 60));
+            g2d.drawOval(x, y, imageSize, imageSize);
             g2d.setStroke(previousStroke);
         }
     }
@@ -102,6 +127,8 @@ public class Enemy {
                 return FAST_IMAGE_SIZE;
             case TANK:
                 return TANK_IMAGE_SIZE;
+            case KEY_HUNTER:
+                return KEY_HUNTER_IMAGE_SIZE;
             default:
                 return NORMAL_IMAGE_SIZE;
         }
@@ -113,6 +140,8 @@ public class Enemy {
                 return FAST_HITBOX_WIDTH;
             case TANK:
                 return TANK_HITBOX_WIDTH;
+            case KEY_HUNTER:
+                return KEY_HUNTER_HITBOX_WIDTH;
             default:
                 return NORMAL_HITBOX_WIDTH;
         }
@@ -124,6 +153,8 @@ public class Enemy {
                 return FAST_HITBOX_HEIGHT;
             case TANK:
                 return TANK_HITBOX_HEIGHT;
+            case KEY_HUNTER:
+                return KEY_HUNTER_HITBOX_HEIGHT;
             default:
                 return NORMAL_HITBOX_HEIGHT;
         }
@@ -135,6 +166,8 @@ public class Enemy {
                 return FAST_HEALTH;
             case TANK:
                 return TANK_HEALTH;
+            case KEY_HUNTER:
+                return KEY_HUNTER_HEALTH;
             default:
                 return NORMAL_HEALTH;
         }
@@ -151,5 +184,19 @@ public class Enemy {
 
     public int getY() {
         return y;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    private int getCenterX(int panelWidth, int panelHeight) {
+        double scale = getPanelScale(panelWidth, panelHeight);
+        return x + getScaledSize(getImageSize(), scale) / 2;
+    }
+
+    private int getCenterY(int panelWidth, int panelHeight) {
+        double scale = getPanelScale(panelWidth, panelHeight);
+        return y + getScaledSize(getImageSize(), scale) / 2;
     }
 }

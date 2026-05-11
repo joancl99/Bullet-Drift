@@ -1,7 +1,9 @@
 package bulletdrift.rendering;
 
 import bulletdrift.entities.Enemy;
+import bulletdrift.entities.KeyObjective;
 import bulletdrift.entities.Player;
+import bulletdrift.entities.Portal;
 import bulletdrift.entities.PowerUp;
 
 import java.awt.Graphics;
@@ -18,7 +20,9 @@ public class GameRenderer {
         ImageObserver imageObserver,
         Player player,
         ArrayList<Enemy> enemies,
-        ArrayList<PowerUp> powerUps
+        ArrayList<PowerUp> powerUps,
+        KeyObjective keyObjective,
+        Portal portal
     ) {
         g.drawImage(backgroundImage, 0, 0, panelWidth, panelHeight, imageObserver);
         player.render(g);
@@ -29,6 +33,14 @@ public class GameRenderer {
 
         for (PowerUp powerUp : powerUps) {
             powerUp.paint(g, false, panelWidth, panelHeight);
+        }
+
+        if (keyObjective != null) {
+            keyObjective.paint(g, panelWidth, panelHeight);
+        }
+
+        if (portal != null) {
+            portal.paint(g, panelWidth, panelHeight);
         }
     }
 }

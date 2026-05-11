@@ -94,13 +94,19 @@ public class HudRenderer {
     public Rectangle getResumeButtonBounds(int panelWidth, int panelHeight) {
         int buttonWidth = scaleHud(PAUSE_BUTTON_WIDTH, panelWidth, panelHeight);
         int buttonHeight = scaleHud(PAUSE_BUTTON_HEIGHT, panelWidth, panelHeight);
-        return new Rectangle(panelWidth / 2 - buttonWidth / 2, panelHeight / 2 - scaleHud(10, panelWidth, panelHeight), buttonWidth, buttonHeight);
+        return new Rectangle(panelWidth / 2 - buttonWidth / 2, panelHeight / 2 - scaleHud(50, panelWidth, panelHeight), buttonWidth, buttonHeight);
+    }
+
+    public Rectangle getRestartButtonBounds(int panelWidth, int panelHeight) {
+        int buttonWidth = scaleHud(PAUSE_BUTTON_WIDTH, panelWidth, panelHeight);
+        int buttonHeight = scaleHud(PAUSE_BUTTON_HEIGHT, panelWidth, panelHeight);
+        return new Rectangle(panelWidth / 2 - buttonWidth / 2, panelHeight / 2 + scaleHud(30, panelWidth, panelHeight), buttonWidth, buttonHeight);
     }
 
     public Rectangle getExitButtonBounds(int panelWidth, int panelHeight) {
         int buttonWidth = scaleHud(PAUSE_BUTTON_WIDTH, panelWidth, panelHeight);
         int buttonHeight = scaleHud(PAUSE_BUTTON_HEIGHT, panelWidth, panelHeight);
-        return new Rectangle(panelWidth / 2 - buttonWidth / 2, panelHeight / 2 + scaleHud(70, panelWidth, panelHeight), buttonWidth, buttonHeight);
+        return new Rectangle(panelWidth / 2 - buttonWidth / 2, panelHeight / 2 + scaleHud(110, panelWidth, panelHeight), buttonWidth, buttonHeight);
     }
 
     private double getHudScale(int panelWidth, int panelHeight) {
@@ -235,10 +241,11 @@ public class HudRenderer {
         drawCenteredString(g2d, panelWidth, "PAUSA", panelHeight / 2 - scaleHud(90, panelWidth, panelHeight));
 
         drawMenuButton(g2d, panelWidth, panelHeight, getResumeButtonBounds(panelWidth, panelHeight), "Reanudar");
+        drawMenuButton(g2d, panelWidth, panelHeight, getRestartButtonBounds(panelWidth, panelHeight), "Reiniciar");
         drawMenuButton(g2d, panelWidth, panelHeight, getExitButtonBounds(panelWidth, panelHeight), "Salir");
 
         g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(22, panelWidth, panelHeight)));
-        drawCenteredString(g2d, panelWidth, "ESC/ENTER: reanudar   Q: salir", panelHeight / 2 + scaleHud(170, panelWidth, panelHeight));
+        drawCenteredString(g2d, panelWidth, "ESC/ENTER: reanudar   R: reiniciar   Q: salir", panelHeight / 2 + scaleHud(210, panelWidth, panelHeight));
     }
 
     private void drawMenuButton(Graphics2D g2d, int panelWidth, int panelHeight, Rectangle bounds, String text) {

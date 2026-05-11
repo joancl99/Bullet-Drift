@@ -1,7 +1,9 @@
 package bulletdrift.systems;
 
 import bulletdrift.entities.Enemy;
+import bulletdrift.entities.KeyObjective;
 import bulletdrift.entities.Player;
+import bulletdrift.entities.Portal;
 import bulletdrift.entities.PowerUp;
 import bulletdrift.entities.Projectile;
 
@@ -25,6 +27,10 @@ public class CollisionManager {
         Player player,
         ArrayList<Enemy> enemies,
         ArrayList<PowerUp> powerUps,
+        KeyObjective keyObjective,
+        Portal portal,
+        boolean portalActive,
+        boolean keyCollected,
         int panelWidth,
         int panelHeight,
         long damageInvulnerabilityMs
@@ -35,6 +41,19 @@ public class CollisionManager {
         Iterator<Enemy> enemyIterator = enemies.iterator();
         while (enemyIterator.hasNext()) {
             Enemy enemy = enemyIterator.next();
+
+            if (enemy.getType() == Enemy.Type.KEY_HUNTER && keyObjective != null
+                && enemy.getHitBoxEnemy(panelWidth, panelHeight).intersects(keyObjective.getHitBox(panelWidth, panelHeight))) {
+                enemyIterator.remove();
+                keyObjective.takeHit();
+                result.setFeedback("LLAVE -" + KeyObjective.HIT_DAMAGE + " HP", new Color(255, 90, 90));
+                if (keyObjective.isDestroyed()) {
+                    result.setKeyDestroyed(true);
+                    return result;
+                }
+                continue;
+            }
+
             if (playerHitbox.intersects(enemy.getHitBoxEnemy(panelWidth, panelHeight))) {
                 if (player.isInvulnerable()) {
                     continue;
@@ -91,6 +110,20 @@ public class CollisionManager {
             }
         }
 
+        if (keyObjective != null && playerHitbox.intersects(keyObjective.getHitBox(panelWidth, panelHeight))) {
+            if (portalActive) {
+                result.setKeyCollected(true);
+                result.setFeedback("LLAVE RECOGIDA", new Color(180, 220, 255));
+            } else {
+                result.setFeedback("DEFIENDE LA LLAVE", new Color(180, 220, 255));
+            }
+        }
+
+        if (portal != null && portalActive && keyCollected && playerHitbox.intersects(portal.getHitBox(panelWidth, panelHeight))) {
+            result.setPortalUsed(true);
+            result.setFeedback("PORTAL LISTO", new Color(180, 120, 255));
+        }
+
         return result;
     }
 
@@ -119,6 +152,9 @@ public class CollisionManager {
     public static class CollisionResult {
         private int scoreToAdd;
         private boolean playerLifeLost;
+        private boolean keyDestroyed;
+        private boolean keyCollected;
+        private boolean portalUsed;
         private String feedbackText;
         private Color feedbackColor;
 
@@ -136,6 +172,30 @@ public class CollisionManager {
 
         public void setPlayerLifeLost(boolean playerLifeLost) {
             this.playerLifeLost = playerLifeLost;
+        }
+
+        public boolean isKeyDestroyed() {
+            return keyDestroyed;
+        }
+
+        public void setKeyDestroyed(boolean keyDestroyed) {
+            this.keyDestroyed = keyDestroyed;
+        }
+
+        public boolean isKeyCollected() {
+            return keyCollected;
+        }
+
+        public void setKeyCollected(boolean keyCollected) {
+            this.keyCollected = keyCollected;
+        }
+
+        public boolean isPortalUsed() {
+            return portalUsed;
+        }
+
+        public void setPortalUsed(boolean portalUsed) {
+            this.portalUsed = portalUsed;
         }
 
         public void setFeedback(String feedbackText, Color feedbackColor) {

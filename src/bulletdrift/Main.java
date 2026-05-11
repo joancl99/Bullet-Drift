@@ -9,7 +9,7 @@ public class Main {
     {
         SwingUtilities.invokeLater(() -> 
         {
-            JFrame frame = new JFrame("Juegardo");
+            JFrame frame = new JFrame("Bullet Drift");
             GameManager gamePanel = new GameManager();
             
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

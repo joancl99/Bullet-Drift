@@ -94,6 +94,8 @@ public class GameManager extends JPanel {
                 if (session.isPaused()) {
                     if (keyCode == KeyEvent.VK_ENTER) {
                         setPaused(false);
+                    } else if (keyCode == KeyEvent.VK_R) {
+                        resetGame();
                     } else if (keyCode == KeyEvent.VK_Q) {
                         System.exit(0);
                     }
@@ -137,7 +139,7 @@ public class GameManager extends JPanel {
                 if (firing) {
                     player.shoot();
                 }
-                boolean playerLifeLost = gameUpdateSystem.update(
+                GameUpdateSystem.UpdateResult updateResult = gameUpdateSystem.update(
                     player,
                     enemies,
                     powerUps,
@@ -146,7 +148,10 @@ public class GameManager extends JPanel {
                     getHeight(),
                     DAMAGE_INVULNERABILITY_MS
                 );
-                if (playerLifeLost) {
+                if (updateResult.isKeyDestroyed()) {
+                    session.setGameOver(true);
+                    session.showPowerUpFeedback("LLAVE DESTRUIDA", new Color(255, 80, 80));
+                } else if (updateResult.isPlayerLifeLost()) {
                     handlePlayerLifeLost();
                 }
                 repaint();
@@ -196,7 +201,18 @@ public class GameManager extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        gameRenderer.drawScene(g, getWidth(), getHeight(), backgroundImage, this, player, enemies, powerUps);
+        gameRenderer.drawScene(
+            g,
+            getWidth(),
+            getHeight(),
+            backgroundImage,
+            this,
+            player,
+            enemies,
+            powerUps,
+            session.getKeyObjective(),
+            session.getPortal()
+        );
 
         hudRenderer.draw(
             g,
@@ -234,6 +250,8 @@ public class GameManager extends JPanel {
     private void handlePauseClick(Point point) {
         if (hudRenderer.getResumeButtonBounds(getWidth(), getHeight()).contains(point)) {
             setPaused(false);
+        } else if (hudRenderer.getRestartButtonBounds(getWidth(), getHeight()).contains(point)) {
+            resetGame();
         } else if (hudRenderer.getExitButtonBounds(getWidth(), getHeight()).contains(point)) {
             System.exit(0);
         }

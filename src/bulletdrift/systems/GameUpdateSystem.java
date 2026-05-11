@@ -27,7 +27,7 @@ public class GameUpdateSystem {
         this.collisionManager = collisionManager;
     }
 
-    public boolean update(
+    public UpdateResult update(
         Player player,
         ArrayList<Enemy> enemies,
         ArrayList<PowerUp> powerUps,
@@ -36,9 +36,18 @@ public class GameUpdateSystem {
         int panelHeight,
         long damageInvulnerabilityMs
     ) {
-        enemySpawner.generateEnemy(enemies, panelWidth, session.getWave());
-        powerUpSpawner.generatePowerUp(powerUps, panelWidth, panelHeight);
-        movementSystem.updateEnemies(enemies, panelHeight);
+        session.updateFinalProgression(panelWidth, panelHeight);
+
+        if (session.isPortalActive()) {
+            enemies.clear();
+        }
+
+        if (session.shouldSpawnEnemies()) {
+            enemySpawner.generateEnemy(enemies, panelWidth, session.getWave(), session.hasDefendableKey());
+            powerUpSpawner.generatePowerUp(powerUps, panelWidth, panelHeight);
+        }
+
+        movementSystem.updateEnemies(enemies, session.getKeyObjective(), panelWidth, panelHeight);
         movementSystem.updatePowerUps(powerUps, player, panelWidth, panelHeight);
         player.updateProjectiles(panelWidth, panelHeight);
 
@@ -46,26 +55,75 @@ public class GameUpdateSystem {
             player,
             enemies,
             powerUps,
+            session.getKeyObjective(),
+            session.getPortal(),
+            session.isPortalActive(),
+            session.hasKeyCollected(),
             panelWidth,
             panelHeight,
             damageInvulnerabilityMs
         );
 
         if (result.isPlayerLifeLost()) {
-            return true;
+            return UpdateResult.playerLifeLost();
         }
 
-        applyCollisionResult(result, session);
-        return false;
+        if (result.isKeyDestroyed()) {
+            return UpdateResult.keyDestroyed();
+        }
+
+        applyCollisionResult(result, session, enemies);
+        return UpdateResult.none();
     }
 
-    private void applyCollisionResult(CollisionManager.CollisionResult result, GameSession session) {
+    private void applyCollisionResult(CollisionManager.CollisionResult result, GameSession session, ArrayList<Enemy> enemies) {
         if (result.getScoreToAdd() > 0) {
             session.addScore(result.getScoreToAdd());
         }
 
         if (result.hasFeedback()) {
             session.showPowerUpFeedback(result.getFeedbackText(), result.getFeedbackColor());
+        }
+
+        if (session.consumeWaveChanged()) {
+            enemies.clear();
+        }
+
+        if (result.isKeyCollected()) {
+            session.collectKey();
+        }
+
+        if (result.isPortalUsed()) {
+            session.usePortal();
+        }
+    }
+
+    public static class UpdateResult {
+        private boolean playerLifeLost;
+        private boolean keyDestroyed;
+
+        private static UpdateResult none() {
+            return new UpdateResult();
+        }
+
+        private static UpdateResult playerLifeLost() {
+            UpdateResult result = new UpdateResult();
+            result.playerLifeLost = true;
+            return result;
+        }
+
+        private static UpdateResult keyDestroyed() {
+            UpdateResult result = new UpdateResult();
+            result.keyDestroyed = true;
+            return result;
+        }
+
+        public boolean isPlayerLifeLost() {
+            return playerLifeLost;
+        }
+
+        public boolean isKeyDestroyed() {
+            return keyDestroyed;
         }
     }
 }

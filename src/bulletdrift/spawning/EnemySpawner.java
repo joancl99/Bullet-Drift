@@ -12,7 +12,8 @@ public class EnemySpawner {
     private static final int ENEMY_SPAWN_MARGIN = 50;
     private static final int ENEMY_START_Y = -50;
     private static final int BASE_MIN_ENEMY_SPEED = 2;
-    private static final int BASE_ENEMY_SPEED_VARIATION = 4;
+    private static final int BASE_ENEMY_SPEED_VARIATION = 3;
+    private static final int SPEED_WAVE_CAP = 9;
     private static final int MAX_ENEMY_SPEED_LIMIT = 22;
     private static final int BASE_ENEMY_SPAWN_CHANCE = 42;
     private static final int MIN_ENEMY_SPAWN_CHANCE = 5;
@@ -27,6 +28,10 @@ public class EnemySpawner {
     private static final int TANK_ENEMY_CHANCE_PER_WAVE_PERCENT = 5;
     private static final int TANK_ENEMY_MAX_CHANCE_PERCENT = 35;
     private static final int TANK_ENEMY_SPEED_PENALTY = 3;
+    private static final int KEY_HUNTER_START_WAVE = 6;
+    private static final int KEY_HUNTER_CHANCE_PERCENT = 10;
+    private static final int KEY_HUNTER_MIN_SPEED = 6;
+    private static final int KEY_HUNTER_MAX_SPEED = 9;
 
     private Random rand;
 
@@ -34,7 +39,7 @@ public class EnemySpawner {
         this.rand = rand;
     }
 
-    public void generateEnemy(ArrayList<Enemy> enemies, int panelWidth, int wave) {
+    public void generateEnemy(ArrayList<Enemy> enemies, int panelWidth, int wave, boolean keyDefendable) {
         if (panelWidth <= ENEMY_SPAWN_MARGIN) return;
 
         int maxEnemies = getMaxEnemies(wave);
@@ -43,11 +48,13 @@ public class EnemySpawner {
 
         int x = rand.nextInt(panelWidth - ENEMY_SPAWN_MARGIN);
         int speed = getEnemySpeed(wave);
-        Enemy.Type enemyType = getEnemyType(wave);
+        Enemy.Type enemyType = getEnemyType(wave, keyDefendable);
         if (enemyType == Enemy.Type.FAST) {
             speed = Math.min(MAX_ENEMY_SPEED_LIMIT, speed + FAST_ENEMY_SPEED_BONUS);
         } else if (enemyType == Enemy.Type.TANK) {
             speed = Math.max(1, speed - TANK_ENEMY_SPEED_PENALTY);
+        } else if (enemyType == Enemy.Type.KEY_HUNTER) {
+            speed = KEY_HUNTER_MIN_SPEED + rand.nextInt(KEY_HUNTER_MAX_SPEED - KEY_HUNTER_MIN_SPEED + 1);
         }
 
         enemies.add(new Enemy(x, ENEMY_START_Y, speed, enemyType));
@@ -62,12 +69,17 @@ public class EnemySpawner {
     }
 
     private int getEnemySpeed(int wave) {
-        int minSpeed = Math.min(MAX_ENEMY_SPEED_LIMIT - 1, BASE_MIN_ENEMY_SPEED + wave);
-        int speedVariation = BASE_ENEMY_SPEED_VARIATION + wave * 2;
+        int cappedWave = Math.min(SPEED_WAVE_CAP, wave);
+        int minSpeed = Math.min(MAX_ENEMY_SPEED_LIMIT - 1, BASE_MIN_ENEMY_SPEED + cappedWave / 3);
+        int speedVariation = BASE_ENEMY_SPEED_VARIATION + cappedWave / 2;
         return Math.min(MAX_ENEMY_SPEED_LIMIT, rand.nextInt(speedVariation) + minSpeed);
     }
 
-    private Enemy.Type getEnemyType(int wave) {
+    private Enemy.Type getEnemyType(int wave, boolean keyDefendable) {
+        if (keyDefendable && wave >= KEY_HUNTER_START_WAVE && rand.nextInt(100) < KEY_HUNTER_CHANCE_PERCENT) {
+            return Enemy.Type.KEY_HUNTER;
+        }
+
         if (wave < FAST_ENEMY_START_WAVE) return Enemy.Type.NORMAL;
 
         if (wave >= TANK_ENEMY_START_WAVE) {
