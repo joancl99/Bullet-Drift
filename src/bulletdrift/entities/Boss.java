@@ -14,18 +14,19 @@ public class Boss {
     public static final int MAX_HEALTH = 500;
     public static final int PROJECTILE_DAMAGE = 10;
 
-    private static final int BASE_SIZE = 340;
-    private static final int TOP_MARGIN = 80;
-    private static final double HITBOX_SCALE = 0.76;
+    private static final int BASE_SIZE = 430;
+    private static final int TOP_MARGIN = 0;
+    private static final double HITBOX_SCALE = 0.84;
     private static final int REFERENCE_PANEL_WIDTH = 1920;
     private static final int REFERENCE_PANEL_HEIGHT = 1080;
     private static final int HEALTH_BAR_WIDTH = 920;
     private static final int HEALTH_BAR_HEIGHT = 30;
     private static final int HEALTH_BAR_BOTTOM_MARGIN = 55;
-    private static final int PROJECTILE_SPAWN_OFFSET_Y = 95;
+    private static final int PROJECTILE_SPAWN_OFFSET_Y = 125;
     private static final int PROJECTILE_SPEED = 12;
     private static final int HORIZONTAL_SPEED = 4;
     private static final long SHOOT_INTERVAL_MS = 900;
+    private static final long INITIAL_SHOOT_DELAY_MS = 3000;
 
     private int x;
     private int y;
@@ -44,7 +45,7 @@ public class Boss {
         this.bossImage = new ImageIcon("src/Files/Enemies/Boss.png").getImage();
         this.projectiles = new ArrayList<>();
         this.direction = 1;
-        this.lastShootTime = 0;
+        this.lastShootTime = System.currentTimeMillis() + INITIAL_SHOOT_DELAY_MS - SHOOT_INTERVAL_MS;
     }
 
     public void update(int panelWidth, int panelHeight) {

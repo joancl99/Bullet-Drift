@@ -19,6 +19,7 @@ public class Player extends JPanel {
     private static final int RAPID_SHOOT_COOLDOWN_MS = 120;
     private static final int DEFAULT_PANEL_WIDTH = 800;
     private static final int DEFAULT_PANEL_HEIGHT = 600;
+    private static final double BOSS_FIGHT_START_Y_RATIO = 0.78;
     private static final double HITBOX_WIDTH_SCALE = 0.58;
     private static final double HITBOX_HEIGHT_SCALE = 0.70;
     private static final int PROJECTILE_SPAWN_OFFSET = 5;
@@ -488,7 +489,7 @@ public class Player extends JPanel {
         pressedKeys.clear();
         lastShootTime = 0;
         x = (panelWidth - width) / 2;
-        y = (panelHeight - height) / 2;
+        y = Math.min(panelHeight - height, (int) (panelHeight * BOSS_FIGHT_START_Y_RATIO));
         setDirection(false, false, false, true);
     }
 
