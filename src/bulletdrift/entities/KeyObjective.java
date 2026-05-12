@@ -70,6 +70,10 @@ public class KeyObjective {
         health = Math.max(0, health - HIT_DAMAGE);
     }
 
+    public void healHalfHealth() {
+        health = Math.min(MAX_HEALTH, health + MAX_HEALTH / 2);
+    }
+
     public boolean isDestroyed() {
         return health <= 0;
     }

@@ -45,7 +45,7 @@ public class GameUpdateSystem {
 
         if (session.shouldSpawnEnemies()) {
             enemySpawner.generateEnemy(enemies, panelWidth, session.getWave(), session.hasDefendableKey());
-            powerUpSpawner.generatePowerUp(powerUps, panelWidth, panelHeight);
+            powerUpSpawner.generatePowerUp(powerUps, panelWidth, panelHeight, session.getWave(), session.hasDefendableKey());
         }
 
         movementSystem.updateEnemies(enemies, player, session.getKeyObjective(), panelWidth, panelHeight);

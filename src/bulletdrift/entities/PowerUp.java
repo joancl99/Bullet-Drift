@@ -16,6 +16,7 @@ public class PowerUp {
     public static final String TYPE_MEGA_MUSH = "megaMush";
     public static final String TYPE_MYSTERY_BOX = "mysteryBox";
     public static final String TYPE_MAGNET = "iman";
+    public static final String TYPE_PADLOCK = "padlock";
 
     private static final int WIDTH = 55;
     private static final int HEIGHT = 60;
@@ -68,6 +69,9 @@ public class PowerUp {
                 break;
             case TYPE_MAGNET:
                 this.powerUpImage = new ImageIcon("src/Files/PowerUps/Magnet.png").getImage();
+                break;
+            case TYPE_PADLOCK:
+                this.powerUpImage = new ImageIcon("src/Files/BossAcces/Padlock.png").getImage();
                 break;
             default:
                 this.powerUpImage = new ImageIcon("src/Files/PowerUps/Invulnerability.png").getImage();

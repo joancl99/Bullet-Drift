@@ -106,7 +106,13 @@ public class CollisionManager {
         while (powerUpIterator.hasNext()) {
             PowerUp powerUp = powerUpIterator.next();
             if (playerHitbox.intersects(powerUp.getHitBox(panelWidth, panelHeight))) {
-                PowerUpSystem.PowerUpFeedback feedback = powerUpSystem.apply(powerUp, player);
+                PowerUpSystem.PowerUpFeedback feedback;
+                if (PowerUp.TYPE_PADLOCK.equals(powerUp.getType()) && keyObjective != null) {
+                    keyObjective.healHalfHealth();
+                    feedback = new PowerUpSystem.PowerUpFeedback("LLAVE +50 HP", new Color(180, 220, 255));
+                } else {
+                    feedback = powerUpSystem.apply(powerUp, player);
+                }
                 if (feedback != null) {
                     result.setFeedback(feedback.getText(), feedback.getColor());
                 }
