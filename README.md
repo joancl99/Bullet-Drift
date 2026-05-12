@@ -4,9 +4,9 @@ Bullet Drift es un juego Java 2D hecho con Swing. Nacio como un proyecto antiguo
 
 ## Estado Del Proyecto
 
-El juego actualmente compila y ejecuta. La base jugable ya incluye movimiento, disparo, enemigos, puntuacion, vidas, power-ups, pausa y modo debug de hitboxes.
+El juego actualmente compila y ejecuta. La base jugable ya incluye movimiento, disparo, oleadas, varios tipos de enemigos, puntuacion, HP, vidas, power-ups, pausa, modo debug de hitboxes, fase de llave/portal y un boss final provisional.
 
-Sigue siendo un proyecto en desarrollo: las colisiones, el balance y la estructura interna todavia se estan puliendo.
+Sigue siendo un proyecto en desarrollo: el balance, las sensaciones de combate, la fase final y la estructura interna todavia se estan puliendo.
 
 ## Requisitos
 
@@ -36,7 +36,8 @@ java -cp out bulletdrift.Main
 - Click izquierdo: disparar.
 - Mantener click izquierdo: disparo automatico.
 - `ESC`: pausar o reanudar.
-- `ENTER`: reanudar desde pausa o reiniciar tras game over.
+- `ENTER`: reanudar desde pausa o reiniciar tras game over/victoria.
+- `R`: reiniciar desde pausa.
 - `Q`: salir desde pausa.
 - `F1`: activar/desactivar debug de hitboxes.
 
@@ -44,14 +45,28 @@ java -cp out bulletdrift.Main
 
 - Movimiento del jugador limitado a la pantalla.
 - Disparo normal y disparo automatico manteniendo click.
-- Enemigos que aparecen desde la parte superior.
-- Sistema de puntuacion por enemigos destruidos.
-- Sistema de vidas y game over.
+- Enemigos con distintos comportamientos por oleadas.
+- Sistema de puntuacion: cada enemigo derrotado da 10 puntos.
+- Progresion por oleadas: cada 100 puntos se avanza de oleada.
+- Sistema de HP, vidas y game over.
 - Invulnerabilidad breve tras recibir dano, con parpadeo visual.
-- Pausa con menu de reanudar/salir.
-- HUD con puntos, vidas y power-ups activos.
+- Pausa con menu de reanudar, reiniciar y salir.
+- HUD con puntos, oleada, HP, vidas y power-ups activos.
 - Modo debug de hitboxes con `F1`.
+- Llave defendible desde la fase final: si los enemigos especiales la destruyen, se pierde.
+- Portal y boss final provisional con pantalla de victoria al derrotarlo.
+- Ventana redimensionable con HUD, enemigos, power-ups y hitboxes escalados.
 - Scripts de compilacion y ejecucion.
+
+## Enemigos
+
+- `NORMAL`: enemigo basico. Aparece desde la oleada 0.
+- `FAST`: enemigo rapido. Aparece desde la oleada 1.
+- `TANK`: enemigo mas grande y resistente. Aparece desde la oleada 2.
+- `ZIGZAG`: enemigo que baja alternando movimiento horizontal. Aparece desde la oleada 3.
+- `CHASER`: enemigo que persigue al jugador con velocidad moderada. Aparece desde la oleada 4.
+- `KEY_HUNTER`: enemigo de fase final que va directamente hacia la llave.
+- `Boss`: boss final provisional tras usar el portal.
 
 ## Power-Ups
 
@@ -61,27 +76,36 @@ java -cp out bulletdrift.Main
 - `disparoRapido`: aumenta temporalmente la cadencia de disparo.
 - `invulnerabilidad`: evita temporalmente el dano por enemigos.
 - `superVelocidad`: aumenta temporalmente la velocidad del jugador.
-- `bomba`: elimina los enemigos actuales en pantalla.
 - `bombShot`: dispara balas bomba con dano de area.
 - `fireShoot`: dispara proyectiles de fuego mas potentes.
-- `moneda`: suma monedas al contador del HUD.
-- `llave`: preparada para acceso futuro al boss final; no aparece de forma normal todavia.
 - `megaMush`: combina velocidad, invulnerabilidad y disparo rapido.
 - `mysteryBox`: activa un power-up aleatorio.
 - `iman`: atrae los power-ups hacia el jugador.
 
-Los power-ups tienen feedback visual al recogerse y ya no aparecen en la zona superior de la pantalla para evitar situaciones injustas.
+Los power-ups tienen aparicion ponderada, feedback visual al recogerse y ya no aparecen en la zona superior de la pantalla para evitar situaciones injustas.
+
+## Fase Final
+
+- Al alcanzar 600 puntos aparece una llave defendible en la zona inferior.
+- Desde esa fase pueden aparecer `KEY_HUNTER`, que intentan destruir la llave.
+- Al alcanzar 1000 puntos se abre un portal y dejan de aparecer enemigos y power-ups normales.
+- Con la llave recogida, tocar el portal inicia el boss final provisional.
+- Al derrotar al boss, la partida termina con pantalla de victoria.
 
 ## Estructura
 
 ```text
-Files/                      Recursos graficos
+src/Files/BossAcces/         Sprites de llave y portal
+src/Files/Enemies/           Sprites de enemigos y boss
+src/Files/Player/            Sprites del jugador y bala normal
+src/Files/PowerUps/          Sprites de power-ups y disparos especiales
+src/Files/WallPapers/        Fondos del juego
 src/bulletdrift/             Clase principal
-src/bulletdrift/core/        Coordinacion principal del juego
+src/bulletdrift/core/        Coordinacion y estado principal del juego
 src/bulletdrift/entities/    Entidades jugables
-src/bulletdrift/rendering/   Renderizado de HUD e interfaces
-src/bulletdrift/spawning/    Generacion de entidades
-src/bulletdrift/systems/     Sistemas de reglas de juego
+src/bulletdrift/rendering/   Renderizado de escena, HUD e interfaces
+src/bulletdrift/spawning/    Generacion de enemigos y power-ups
+src/bulletdrift/systems/     Sistemas de reglas, movimiento y colisiones
 build.bat                    Compila el proyecto
 run.bat                      Ejecuta el juego
 ```
@@ -94,12 +118,11 @@ bulletdrift.Main
 
 ## Roadmap
 
+- Probar y ajustar balance de las primeras oleadas.
+- Pulir la fase de llave, portal y boss final.
 - Ajustar mejor las hitboxes y sensacion de colisiones.
-- Limpiar constantes y numeros magicos.
 - Mejorar feedback visual y efectos.
 - Anadir sonidos.
-- Anadir oleadas de enemigos y dificultad progresiva.
-- Crear tipos de enemigos distintos.
 - Mejorar menus y estados del juego.
 - Empaquetar como `.jar` ejecutable.
 
