@@ -77,12 +77,13 @@ public class GameUpdateSystem {
             return UpdateResult.keyDestroyed();
         }
 
-        applyCollisionResult(result, session, enemies, panelWidth, panelHeight);
+        applyCollisionResult(result, player, session, enemies, panelWidth, panelHeight);
         return UpdateResult.none();
     }
 
     private void applyCollisionResult(
         CollisionManager.CollisionResult result,
+        Player player,
         GameSession session,
         ArrayList<Enemy> enemies,
         int panelWidth,
@@ -106,6 +107,7 @@ public class GameUpdateSystem {
 
         if (result.isPortalUsed()) {
             session.usePortal(panelWidth, panelHeight);
+            player.prepareForBossFight(panelWidth, panelHeight);
         }
 
         if (result.isBossDefeated()) {

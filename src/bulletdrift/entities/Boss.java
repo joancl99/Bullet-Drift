@@ -15,14 +15,14 @@ public class Boss {
     public static final int PROJECTILE_DAMAGE = 10;
 
     private static final int BASE_SIZE = 340;
-    private static final int CENTER_Y_OFFSET = 150;
+    private static final int TOP_MARGIN = 80;
     private static final double HITBOX_SCALE = 0.76;
     private static final int REFERENCE_PANEL_WIDTH = 1920;
     private static final int REFERENCE_PANEL_HEIGHT = 1080;
     private static final int HEALTH_BAR_WIDTH = 920;
     private static final int HEALTH_BAR_HEIGHT = 30;
     private static final int HEALTH_BAR_BOTTOM_MARGIN = 55;
-    private static final int PROJECTILE_SPAWN_OFFSET_Y = 20;
+    private static final int PROJECTILE_SPAWN_OFFSET_Y = 95;
     private static final int PROJECTILE_SPEED = 12;
     private static final int HORIZONTAL_SPEED = 4;
     private static final long SHOOT_INTERVAL_MS = 900;
@@ -36,9 +36,10 @@ public class Boss {
     private long lastShootTime;
 
     public Boss(int panelWidth, int panelHeight) {
-        int size = getScaledSize(BASE_SIZE, getPanelScale(panelWidth, panelHeight));
+        double scale = getPanelScale(panelWidth, panelHeight);
+        int size = getScaledSize(BASE_SIZE, scale);
         this.x = panelWidth / 2 - size / 2;
-        this.y = panelHeight / 2 - size / 2 - getScaledSize(CENTER_Y_OFFSET, getPanelScale(panelWidth, panelHeight));
+        this.y = getScaledSize(TOP_MARGIN, scale);
         this.health = MAX_HEALTH;
         this.bossImage = new ImageIcon("src/Files/Enemies/Boss.png").getImage();
         this.projectiles = new ArrayList<>();
@@ -135,9 +136,9 @@ public class Boss {
         int projectileSpeed = getScaledSize(PROJECTILE_SPEED, scale);
         int diagonalSpeed = Math.max(1, projectileSpeed / 3);
 
-        projectiles.add(new Projectile(centerX, startY, 0, projectileSpeed, panelWidth, panelHeight, "down"));
-        projectiles.add(new Projectile(centerX, startY, -diagonalSpeed, projectileSpeed, panelWidth, panelHeight, "down"));
-        projectiles.add(new Projectile(centerX, startY, diagonalSpeed, projectileSpeed, panelWidth, panelHeight, "down"));
+        projectiles.add(new Projectile(centerX, startY, 0, projectileSpeed, panelWidth, panelHeight, "down", Projectile.Type.BOSS));
+        projectiles.add(new Projectile(centerX, startY, -diagonalSpeed, projectileSpeed, panelWidth, panelHeight, "down", Projectile.Type.BOSS));
+        projectiles.add(new Projectile(centerX, startY, diagonalSpeed, projectileSpeed, panelWidth, panelHeight, "down", Projectile.Type.BOSS));
         lastShootTime = now;
     }
 

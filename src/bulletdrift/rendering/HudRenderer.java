@@ -108,6 +108,12 @@ public class HudRenderer {
         return new Rectangle(panelWidth / 2 - buttonWidth / 2, panelHeight / 2 + scaleHud(110, panelWidth, panelHeight), buttonWidth, buttonHeight);
     }
 
+    public Rectangle getGameOverRestartButtonBounds(int panelWidth, int panelHeight) {
+        int buttonWidth = scaleHud(PAUSE_BUTTON_WIDTH, panelWidth, panelHeight);
+        int buttonHeight = scaleHud(PAUSE_BUTTON_HEIGHT, panelWidth, panelHeight);
+        return new Rectangle(panelWidth / 2 - buttonWidth / 2, panelHeight / 2 - scaleHud(10, panelWidth, panelHeight), buttonWidth, buttonHeight);
+    }
+
     private double getHudScale(int panelWidth, int panelHeight) {
         double scaleX = panelWidth / (double) DESIGN_WIDTH;
         double scaleY = panelHeight / (double) DESIGN_HEIGHT;
@@ -256,13 +262,7 @@ public class HudRenderer {
         g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(56, panelWidth, panelHeight)));
         drawCenteredString(g2d, panelWidth, victory ? "VICTORIA" : "HAS PERDIDO", panelHeight / 2 - scaleHud(90, panelWidth, panelHeight));
 
-        Rectangle restartButton = new Rectangle(
-            panelWidth / 2 - scaleHud(PAUSE_BUTTON_WIDTH, panelWidth, panelHeight) / 2,
-            panelHeight / 2 - scaleHud(10, panelWidth, panelHeight),
-            scaleHud(PAUSE_BUTTON_WIDTH, panelWidth, panelHeight),
-            scaleHud(PAUSE_BUTTON_HEIGHT, panelWidth, panelHeight)
-        );
-        drawMenuButton(g2d, panelWidth, panelHeight, restartButton, "Reiniciar");
+        drawMenuButton(g2d, panelWidth, panelHeight, getGameOverRestartButtonBounds(panelWidth, panelHeight), "Reiniciar");
 
         g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(22, panelWidth, panelHeight)));
         drawCenteredString(g2d, panelWidth, "ENTER: reiniciar", panelHeight / 2 + scaleHud(110, panelWidth, panelHeight));

@@ -480,6 +480,18 @@ public class Player extends JPanel {
         activateInvulnerability(invulnerabilityDurationMs);
     }
 
+    public void prepareForBossFight(int panelWidth, int panelHeight) {
+        this.panelWidth = panelWidth;
+        this.panelHeight = panelHeight;
+        updateScale();
+        projectiles.clear();
+        pressedKeys.clear();
+        lastShootTime = 0;
+        x = (panelWidth - width) / 2;
+        y = (panelHeight - height) / 2;
+        setDirection(false, false, false, true);
+    }
+
     private void centerInPanel() {
         int currentPanelWidth = getParent() != null ? getParent().getWidth() : panelWidth;
         int currentPanelHeight = getParent() != null ? getParent().getHeight() : panelHeight;

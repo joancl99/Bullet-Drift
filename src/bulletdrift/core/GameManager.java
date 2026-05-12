@@ -115,6 +115,11 @@ public class GameManager extends JPanel {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (session.isGameOver()) {
+                    handleGameOverClick(e.getPoint());
+                    return;
+                }
+
                 if (session.isPaused()) {
                     handlePauseClick(e.getPoint());
                     return;
@@ -256,6 +261,12 @@ public class GameManager extends JPanel {
             resetGame();
         } else if (hudRenderer.getExitButtonBounds(getWidth(), getHeight()).contains(point)) {
             System.exit(0);
+        }
+    }
+
+    private void handleGameOverClick(Point point) {
+        if (hudRenderer.getGameOverRestartButtonBounds(getWidth(), getHeight()).contains(point)) {
+            resetGame();
         }
     }
 

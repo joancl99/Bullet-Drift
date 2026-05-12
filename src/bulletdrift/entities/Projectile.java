@@ -7,7 +7,8 @@ public class Projectile {
     public enum Type {
         NORMAL,
         BOMB,
-        FIRE
+        FIRE,
+        BOSS
     }
 
     private static final int BASE_SIZE = 25;
@@ -48,6 +49,8 @@ public class Projectile {
                 return "src/Files/PowerUps/BombShoot.png";
             case FIRE:
                 return "src/Files/PowerUps/FireShoot.png";
+            case BOSS:
+                return "src/Files/Enemies/BossBullet.png";
             default:
                 return "src/Files/Player/Bullet.png";
         }
