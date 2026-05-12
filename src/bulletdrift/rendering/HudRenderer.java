@@ -86,9 +86,7 @@ public class HudRenderer {
         }
 
         if (gameOver) {
-            g.setFont(new Font("Arial", Font.BOLD, scaleFont(30, panelWidth, panelHeight)));
-            drawCenteredString(g, panelWidth, victory ? "¡Victoria!" : "¡Has perdido!", panelHeight / 2 - scaleHud(50, panelWidth, panelHeight));
-            drawCenteredString(g, panelWidth, "Presiona ENTER para reiniciar", panelHeight / 2);
+            drawGameOverMenu(g, panelWidth, panelHeight, victory);
         }
     }
 
@@ -247,6 +245,27 @@ public class HudRenderer {
 
         g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(22, panelWidth, panelHeight)));
         drawCenteredString(g2d, panelWidth, "ESC/ENTER: reanudar   R: reiniciar   Q: salir", panelHeight / 2 + scaleHud(210, panelWidth, panelHeight));
+    }
+
+    private void drawGameOverMenu(Graphics g, int panelWidth, int panelHeight, boolean victory) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(new Color(0, 0, 0, 170));
+        g2d.fillRect(0, 0, panelWidth, panelHeight);
+
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(56, panelWidth, panelHeight)));
+        drawCenteredString(g2d, panelWidth, victory ? "VICTORIA" : "HAS PERDIDO", panelHeight / 2 - scaleHud(90, panelWidth, panelHeight));
+
+        Rectangle restartButton = new Rectangle(
+            panelWidth / 2 - scaleHud(PAUSE_BUTTON_WIDTH, panelWidth, panelHeight) / 2,
+            panelHeight / 2 - scaleHud(10, panelWidth, panelHeight),
+            scaleHud(PAUSE_BUTTON_WIDTH, panelWidth, panelHeight),
+            scaleHud(PAUSE_BUTTON_HEIGHT, panelWidth, panelHeight)
+        );
+        drawMenuButton(g2d, panelWidth, panelHeight, restartButton, "Reiniciar");
+
+        g2d.setFont(new Font("Arial", Font.BOLD, scaleFont(22, panelWidth, panelHeight)));
+        drawCenteredString(g2d, panelWidth, "ENTER: reiniciar", panelHeight / 2 + scaleHud(110, panelWidth, panelHeight));
     }
 
     private void drawMenuButton(Graphics2D g2d, int panelWidth, int panelHeight, Rectangle bounds, String text) {

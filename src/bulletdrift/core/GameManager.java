@@ -65,8 +65,6 @@ public class GameManager extends JPanel {
         backgroundImage = new ImageIcon("src/Files/WallPapers/Wallpaper.png").getImage();
         bossBackgroundImage = new ImageIcon("src/Files/WallPapers/WallpaperBoss.png").getImage();
 
-        powerUps.add(new PowerUp(180, 330, PowerUp.TYPE_RAPID_FIRE));
-
         this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {

@@ -50,6 +50,9 @@ public class GameUpdateSystem {
 
         movementSystem.updateEnemies(enemies, player, session.getKeyObjective(), panelWidth, panelHeight);
         movementSystem.updatePowerUps(powerUps, player, panelWidth, panelHeight);
+        if (session.getBoss() != null) {
+            session.getBoss().update(panelWidth, panelHeight);
+        }
         player.updateProjectiles(panelWidth, panelHeight);
 
         CollisionManager.CollisionResult result = collisionManager.checkCollisions(

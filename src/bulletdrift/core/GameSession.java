@@ -10,7 +10,8 @@ public class GameSession {
     private static final int POINTS_PER_WAVE = 100;
     private static final int KEY_SPAWN_SCORE = 600;
     private static final int PORTAL_SCORE = 1000;
-    private static final int KEY_BASE_SIZE = 64;
+    private static final int KEY_BASE_WIDTH = 44;
+    private static final int KEY_BASE_HEIGHT = 64;
     private static final int KEY_BOTTOM_MARGIN = 120;
     private static final int REFERENCE_PANEL_WIDTH = 1920;
     private static final int REFERENCE_PANEL_HEIGHT = 1080;
@@ -98,10 +99,11 @@ public class GameSession {
 
     private KeyObjective createKeyObjective(int panelWidth, int panelHeight) {
         double scale = getPanelScale(panelWidth, panelHeight);
-        int keySize = getScaledSize(KEY_BASE_SIZE, scale);
+        int keyWidth = getScaledSize(KEY_BASE_WIDTH, scale);
+        int keyHeight = getScaledSize(KEY_BASE_HEIGHT, scale);
         int bottomMargin = getScaledSize(KEY_BOTTOM_MARGIN, scale);
-        int x = panelWidth / 2 - keySize / 2;
-        int y = Math.max(0, panelHeight - keySize - bottomMargin);
+        int x = panelWidth / 2 - keyWidth / 2;
+        int y = Math.max(0, panelHeight - keyHeight - bottomMargin);
         return new KeyObjective(x, y);
     }
 

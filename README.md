@@ -54,7 +54,7 @@ java -cp out bulletdrift.Main
 - HUD con puntos, oleada, HP, vidas y power-ups activos.
 - Modo debug de hitboxes con `F1`.
 - Llave defendible desde la fase final: si los enemigos especiales la destruyen, se pierde.
-- Portal y boss final provisional con pantalla de victoria al derrotarlo.
+- Portal y boss final provisional con movimiento, disparos, dano por contacto y pantalla de victoria al derrotarlo.
 - Ventana redimensionable con HUD, enemigos, power-ups y hitboxes escalados.
 - Scripts de compilacion y ejecucion.
 
@@ -89,7 +89,7 @@ Los power-ups tienen aparicion ponderada, feedback visual al recogerse y ya no a
 - Al alcanzar 600 puntos aparece una llave defendible en la zona inferior.
 - Desde esa fase pueden aparecer `KEY_HUNTER`, que intentan destruir la llave.
 - Al alcanzar 1000 puntos se abre un portal y dejan de aparecer enemigos y power-ups normales.
-- Con la llave recogida, tocar el portal inicia el boss final provisional.
+- Con la llave recogida, tocar el portal inicia el boss final provisional, que dispara y hace dano por contacto.
 - Al derrotar al boss, la partida termina con pantalla de victoria.
 
 ## Estructura

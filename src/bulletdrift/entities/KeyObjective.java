@@ -13,7 +13,7 @@ public class KeyObjective {
     public static final int MAX_HEALTH = 100;
     public static final int HIT_DAMAGE = 10;
 
-    private static final int BASE_WIDTH = 64;
+    private static final int BASE_WIDTH = 44;
     private static final int BASE_HEIGHT = 64;
     private static final double HITBOX_SCALE = 0.72;
     private static final int REFERENCE_PANEL_WIDTH = 1920;

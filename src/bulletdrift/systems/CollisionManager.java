@@ -14,8 +14,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class CollisionManager {
-    private static final int SCORE_PER_ENEMY = 100;
+    private static final int SCORE_PER_ENEMY = 10;
     private static final int ENEMY_COLLISION_DAMAGE = 20;
+    private static final int BOSS_PROJECTILE_DAMAGE = 20;
+    private static final int BOSS_COLLISION_DAMAGE = 20;
     private static final int BOMB_EXPLOSION_RADIUS = 160;
 
     private PowerUpSystem powerUpSystem;
@@ -127,6 +129,13 @@ public class CollisionManager {
         }
 
         if (boss != null && !boss.isDefeated()) {
+            if (playerHitbox.intersects(boss.getHitBox(panelWidth, panelHeight))) {
+                applyPlayerDamage(player, result, BOSS_COLLISION_DAMAGE, damageInvulnerabilityMs);
+                if (result.isPlayerLifeLost()) {
+                    return result;
+                }
+            }
+
             for (Projectile projectile : new ArrayList<>(player.getProjectiles())) {
                 if (projectile.getHitBox().intersects(boss.getHitBox(panelWidth, panelHeight))) {
                     player.getProjectiles().remove(projectile);
@@ -134,6 +143,15 @@ public class CollisionManager {
                     if (boss.isDefeated()) {
                         result.setBossDefeated(true);
                     }
+                    break;
+                }
+            }
+
+            for (Projectile projectile : new ArrayList<>(boss.getProjectiles())) {
+                if (projectile.getHitBox().intersects(playerHitbox)) {
+                    boss.getProjectiles().remove(projectile);
+                    applyPlayerDamage(player, result, BOSS_PROJECTILE_DAMAGE, damageInvulnerabilityMs);
+                    if (result.isPlayerLifeLost()) return result;
                     break;
                 }
             }
@@ -162,6 +180,27 @@ public class CollisionManager {
         }
 
         return removedCount;
+    }
+
+    private void applyPlayerDamage(Player player, CollisionResult result, int damage, long damageInvulnerabilityMs) {
+        if (player.isInvulnerable()) {
+            return;
+        }
+
+        if (player.hasShield()) {
+            player.deactivateShield();
+            player.activateInvulnerability(damageInvulnerabilityMs);
+            return;
+        }
+
+        player.takeDamage(damage);
+        if (player.isDead()) {
+            result.setPlayerLifeLost(true);
+            return;
+        }
+
+        result.setFeedback("-" + damage + " HP", new Color(255, 90, 90));
+        player.activateInvulnerability(damageInvulnerabilityMs);
     }
 
     public static class CollisionResult {
