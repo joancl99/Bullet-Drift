@@ -8,6 +8,8 @@ public class Enemy {
         NORMAL,
         FAST,
         TANK,
+        ZIGZAG,
+        CHASER,
         KEY_HUNTER
     }
 
@@ -17,24 +19,30 @@ public class Enemy {
     private static final int FAST_IMAGE_SIZE = 70;
     private static final int FAST_HITBOX_WIDTH = 34;
     private static final int FAST_HITBOX_HEIGHT = 45;
-    private static final int FAST_OUTLINE_WIDTH = 3;
     private static final int TANK_IMAGE_SIZE = 115;
     private static final int TANK_HITBOX_WIDTH = 62;
     private static final int TANK_HITBOX_HEIGHT = 78;
-    private static final int TANK_OUTLINE_WIDTH = 4;
+    private static final int ZIGZAG_IMAGE_SIZE = 82;
+    private static final int ZIGZAG_HITBOX_WIDTH = 40;
+    private static final int ZIGZAG_HITBOX_HEIGHT = 52;
+    private static final int CHASER_IMAGE_SIZE = 86;
+    private static final int CHASER_HITBOX_WIDTH = 42;
+    private static final int CHASER_HITBOX_HEIGHT = 55;
     private static final int KEY_HUNTER_IMAGE_SIZE = 78;
     private static final int KEY_HUNTER_HITBOX_WIDTH = 38;
     private static final int KEY_HUNTER_HITBOX_HEIGHT = 50;
-    private static final int KEY_HUNTER_OUTLINE_WIDTH = 4;
     private static final int NORMAL_HEALTH = 1;
     private static final int FAST_HEALTH = 1;
     private static final int TANK_HEALTH = 3;
+    private static final int ZIGZAG_HEALTH = 1;
+    private static final int CHASER_HEALTH = 1;
     private static final int KEY_HUNTER_HEALTH = 1;
     private static final int REFERENCE_PANEL_WIDTH = 1920;
     private static final int REFERENCE_PANEL_HEIGHT = 1080;
 
     private int x, y, speed;
     private int health;
+    private int zigZagDirection;
     private Image enemyImage;
     private Type type;
 
@@ -48,7 +56,8 @@ public class Enemy {
         this.speed = speed;
         this.type = type;
         this.health = getInitialHealth(type);
-        this.enemyImage = new ImageIcon("src/Files/BugEnemy.png").getImage();
+        this.zigZagDirection = x % 2 == 0 ? 1 : -1;
+        this.enemyImage = new ImageIcon(getImagePath(type)).getImage();
     }
 
     public void moveDownEnemy(int getHeight) {
@@ -67,32 +76,37 @@ public class Enemy {
         y += (int) Math.round(dy / distance * speed);
     }
 
+    public void moveZigZag(int panelWidth, int panelHeight) {
+        int imageSize = getScaledSize(getImageSize(), getPanelScale(panelWidth, panelHeight));
+        x += zigZagDirection * Math.max(2, speed / 2);
+        y += speed;
+
+        if (x <= 0 || x + imageSize >= panelWidth) {
+            x = Math.max(0, Math.min(x, panelWidth - imageSize));
+            zigZagDirection *= -1;
+        }
+    }
+
     public void paint(Graphics g, int panelWidth, int panelHeight) {
         double scale = getPanelScale(panelWidth, panelHeight);
         int imageSize = getScaledSize(getImageSize(), scale);
         g.drawImage(enemyImage, x, y, imageSize, imageSize, null);
+    }
 
-        if (type == Type.FAST) {
-            Graphics2D g2d = (Graphics2D) g;
-            Stroke previousStroke = g2d.getStroke();
-            g2d.setStroke(new BasicStroke(getScaledSize(FAST_OUTLINE_WIDTH, scale)));
-            g2d.setColor(new Color(255, 140, 40));
-            g2d.drawOval(x, y, imageSize, imageSize);
-            g2d.setStroke(previousStroke);
-        } else if (type == Type.TANK) {
-            Graphics2D g2d = (Graphics2D) g;
-            Stroke previousStroke = g2d.getStroke();
-            g2d.setStroke(new BasicStroke(getScaledSize(TANK_OUTLINE_WIDTH, scale)));
-            g2d.setColor(new Color(170, 90, 255));
-            g2d.drawRect(x, y, imageSize, imageSize);
-            g2d.setStroke(previousStroke);
-        } else if (type == Type.KEY_HUNTER) {
-            Graphics2D g2d = (Graphics2D) g;
-            Stroke previousStroke = g2d.getStroke();
-            g2d.setStroke(new BasicStroke(getScaledSize(KEY_HUNTER_OUTLINE_WIDTH, scale)));
-            g2d.setColor(new Color(255, 60, 60));
-            g2d.drawOval(x, y, imageSize, imageSize);
-            g2d.setStroke(previousStroke);
+    private String getImagePath(Type type) {
+        switch (type) {
+            case FAST:
+                return "src/Files/Enemies/Fast.png";
+            case TANK:
+                return "src/Files/Enemies/Tank.png";
+            case ZIGZAG:
+                return "src/Files/Enemies/Zigzag.png";
+            case CHASER:
+                return "src/Files/Enemies/Chaser.png";
+            case KEY_HUNTER:
+                return "src/Files/Enemies/KeyHunter.png";
+            default:
+                return "src/Files/Enemies/Normal.png";
         }
     }
 
@@ -127,6 +141,10 @@ public class Enemy {
                 return FAST_IMAGE_SIZE;
             case TANK:
                 return TANK_IMAGE_SIZE;
+            case ZIGZAG:
+                return ZIGZAG_IMAGE_SIZE;
+            case CHASER:
+                return CHASER_IMAGE_SIZE;
             case KEY_HUNTER:
                 return KEY_HUNTER_IMAGE_SIZE;
             default:
@@ -140,6 +158,10 @@ public class Enemy {
                 return FAST_HITBOX_WIDTH;
             case TANK:
                 return TANK_HITBOX_WIDTH;
+            case ZIGZAG:
+                return ZIGZAG_HITBOX_WIDTH;
+            case CHASER:
+                return CHASER_HITBOX_WIDTH;
             case KEY_HUNTER:
                 return KEY_HUNTER_HITBOX_WIDTH;
             default:
@@ -153,6 +175,10 @@ public class Enemy {
                 return FAST_HITBOX_HEIGHT;
             case TANK:
                 return TANK_HITBOX_HEIGHT;
+            case ZIGZAG:
+                return ZIGZAG_HITBOX_HEIGHT;
+            case CHASER:
+                return CHASER_HITBOX_HEIGHT;
             case KEY_HUNTER:
                 return KEY_HUNTER_HITBOX_HEIGHT;
             default:
@@ -166,6 +192,10 @@ public class Enemy {
                 return FAST_HEALTH;
             case TANK:
                 return TANK_HEALTH;
+            case ZIGZAG:
+                return ZIGZAG_HEALTH;
+            case CHASER:
+                return CHASER_HEALTH;
             case KEY_HUNTER:
                 return KEY_HUNTER_HEALTH;
             default:

@@ -48,7 +48,7 @@ public class GameUpdateSystem {
             powerUpSpawner.generatePowerUp(powerUps, panelWidth, panelHeight);
         }
 
-        movementSystem.updateEnemies(enemies, session.getKeyObjective(), panelWidth, panelHeight);
+        movementSystem.updateEnemies(enemies, player, session.getKeyObjective(), panelWidth, panelHeight);
         movementSystem.updatePowerUps(powerUps, player, panelWidth, panelHeight);
         player.updateProjectiles(panelWidth, panelHeight);
 

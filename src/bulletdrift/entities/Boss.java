@@ -13,7 +13,8 @@ public class Boss {
     public static final int MAX_HEALTH = 500;
     public static final int PROJECTILE_DAMAGE = 10;
 
-    private static final int BASE_SIZE = 260;
+    private static final int BASE_SIZE = 340;
+    private static final int CENTER_Y_OFFSET = 150;
     private static final double HITBOX_SCALE = 0.76;
     private static final int REFERENCE_PANEL_WIDTH = 1920;
     private static final int REFERENCE_PANEL_HEIGHT = 1080;
@@ -29,9 +30,9 @@ public class Boss {
     public Boss(int panelWidth, int panelHeight) {
         int size = getScaledSize(BASE_SIZE, getPanelScale(panelWidth, panelHeight));
         this.x = panelWidth / 2 - size / 2;
-        this.y = panelHeight / 2 - size / 2;
+        this.y = panelHeight / 2 - size / 2 - getScaledSize(CENTER_Y_OFFSET, getPanelScale(panelWidth, panelHeight));
         this.health = MAX_HEALTH;
-        this.bossImage = new ImageIcon("src/Files/BugEnemy.png").getImage();
+        this.bossImage = new ImageIcon("src/Files/Enemies/Boss.png").getImage();
     }
 
     public void paint(Graphics g, int panelWidth, int panelHeight) {

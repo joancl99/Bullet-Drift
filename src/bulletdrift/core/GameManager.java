@@ -62,8 +62,8 @@ public class GameManager extends JPanel {
         hudRenderer = new HudRenderer();
         debugHitboxes = false;
         firing = false;
-        backgroundImage = new ImageIcon("src/Files/Wallpaper.png").getImage();
-        bossBackgroundImage = new ImageIcon("src/Files/WallpaperBoss.png").getImage();
+        backgroundImage = new ImageIcon("src/Files/WallPapers/Wallpaper.png").getImage();
+        bossBackgroundImage = new ImageIcon("src/Files/WallPapers/WallpaperBoss.png").getImage();
 
         powerUps.add(new PowerUp(180, 330, PowerUp.TYPE_RAPID_FIRE));
 
@@ -229,6 +229,7 @@ public class GameManager extends JPanel {
             debugHitboxes,
             session.isPaused(),
             session.isGameOver(),
+            session.isVictory(),
             session.getPowerUpFeedbackText(),
             session.getPowerUpFeedbackColor(),
             session.getPowerUpFeedbackEndTime(),

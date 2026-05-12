@@ -38,6 +38,7 @@ public class HudRenderer {
         boolean debugHitboxes,
         boolean paused,
         boolean gameOver,
+        boolean victory,
         String powerUpFeedbackText,
         Color powerUpFeedbackColor,
         long powerUpFeedbackEndTime,
@@ -86,7 +87,7 @@ public class HudRenderer {
 
         if (gameOver) {
             g.setFont(new Font("Arial", Font.BOLD, scaleFont(30, panelWidth, panelHeight)));
-            drawCenteredString(g, panelWidth, "¡Has perdido!", panelHeight / 2 - scaleHud(50, panelWidth, panelHeight));
+            drawCenteredString(g, panelWidth, victory ? "¡Victoria!" : "¡Has perdido!", panelHeight / 2 - scaleHud(50, panelWidth, panelHeight));
             drawCenteredString(g, panelWidth, "Presiona ENTER para reiniciar", panelHeight / 2);
         }
     }

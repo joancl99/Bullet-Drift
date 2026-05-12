@@ -62,7 +62,7 @@ public class Player extends JPanel {
         this.y = (panelHeight - height) / 2;
 
         this.projectiles = new ArrayList<>();
-        this.playerImage = new ImageIcon("src/Files/MainCharacter.png").getImage();
+        this.playerImage = new ImageIcon("src/Files/Player/MainCharacter.png").getImage();
         setFocusable(true);
 
         movementTimer = new Timer(MOVEMENT_TIMER_DELAY_MS, e -> updateMovement());

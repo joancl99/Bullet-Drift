@@ -7,7 +7,7 @@ import bulletdrift.entities.Portal;
 import java.awt.Color;
 
 public class GameSession {
-    private static final int POINTS_PER_WAVE = 100;
+    private static final int POINTS_PER_WAVE = 10;
     private static final int KEY_SPAWN_SCORE = 600;
     private static final int PORTAL_SCORE = 1000;
     private static final int KEY_BASE_SIZE = 64;
@@ -32,6 +32,7 @@ public class GameSession {
     private boolean keyCollected;
     private boolean portalUsed;
     private boolean bossDefeated;
+    private boolean victory;
     private boolean waveChanged;
 
     public GameSession() {
@@ -54,6 +55,7 @@ public class GameSession {
         keyCollected = false;
         portalUsed = false;
         bossDefeated = false;
+        victory = false;
         waveChanged = false;
     }
 
@@ -162,7 +164,13 @@ public class GameSession {
 
     public void defeatBoss() {
         bossDefeated = true;
+        victory = true;
+        gameOver = true;
         showPowerUpFeedback("VICTORIA", new Color(225, 205, 155));
+    }
+
+    public boolean isVictory() {
+        return victory;
     }
 
     public void setScore(int score) {

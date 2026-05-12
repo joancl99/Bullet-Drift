@@ -45,11 +45,11 @@ public class Projectile {
     private String getImagePath(Type type) {
         switch (type) {
             case BOMB:
-                return "src/Files/BombShoot.png";
+                return "src/Files/PowerUps/BombShoot.png";
             case FIRE:
-                return "src/Files/FireShoot.png";
+                return "src/Files/PowerUps/FireShoot.png";
             default:
-                return "src/Files/Bullet.png";
+                return "src/Files/Player/Bullet.png";
         }
     }
 
