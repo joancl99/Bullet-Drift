@@ -7,7 +7,7 @@ import bulletdrift.entities.Portal;
 import java.awt.Color;
 
 public class GameSession {
-    private static final int POINTS_PER_WAVE = 10;
+    private static final int POINTS_PER_WAVE = 100;
     private static final int KEY_SPAWN_SCORE = 600;
     private static final int PORTAL_SCORE = 1000;
     private static final int KEY_BASE_SIZE = 64;

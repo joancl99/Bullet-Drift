@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class CollisionManager {
-    private static final int SCORE_PER_ENEMY = 600;
+    private static final int SCORE_PER_ENEMY = 100;
     private static final int ENEMY_COLLISION_DAMAGE = 20;
     private static final int BOMB_EXPLOSION_RADIUS = 160;
 
