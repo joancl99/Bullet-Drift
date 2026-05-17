@@ -32,7 +32,7 @@ java -cp out bulletdrift.Main
 
 ## Controles
 
-- `WASD` o flechas: mover jugador.
+- `WASD` o flechas: mover jugador en 8 direcciones.
 - Click izquierdo: disparar.
 - Mantener click izquierdo: disparo automatico.
 - `ESC`: pausar o reanudar.
@@ -46,15 +46,15 @@ java -cp out bulletdrift.Main
 - Movimiento del jugador limitado a la pantalla.
 - Disparo normal y disparo automatico manteniendo click.
 - Enemigos con distintos comportamientos por oleadas.
-- Sistema de puntuacion: cada enemigo derrotado da 10 puntos.
-- Progresion por oleadas: cada 100 puntos se avanza de oleada.
-- Sistema de HP, vidas y game over.
+- Sistema de puntuacion: la mayoria de enemigos derrotados da 10 puntos; `TANK` y `KEY_HUNTER` dan 20 puntos si los mata el jugador.
+- Progresion por oleadas: oleadas 0 y 1 duran 50 puntos; desde oleada 2 duran 100 puntos.
+- Sistema de HP, vidas y game over, con vida 0 jugable antes de la derrota final.
 - Invulnerabilidad breve tras recibir dano, con parpadeo visual.
 - Pausa con menu de reanudar, reiniciar y salir.
 - HUD con puntos, oleada, HP, vidas y power-ups activos.
 - Modo debug de hitboxes con `F1`.
-- Llave defendible desde la fase final: si los enemigos especiales la destruyen, se pierde.
-- Portal y boss final provisional con movimiento, disparos, dano por contacto y pantalla de victoria al derrotarlo.
+- Llave defendible desde la fase final: si los enemigos especiales la destruyen, se pierde una vida.
+- Portal y boss final provisional con movimiento, disparos, ataque lateral anti-campeo, dano por contacto y pantalla de victoria al derrotarlo.
 - Ventana redimensionable con HUD, enemigos, power-ups y hitboxes escalados.
 - Scripts de compilacion y ejecucion.
 
@@ -82,14 +82,15 @@ java -cp out bulletdrift.Main
 - `mysteryBox`: activa un power-up aleatorio.
 - `iman`: atrae los power-ups hacia el jugador.
 
-Los power-ups tienen aparicion ponderada, feedback visual al recogerse y ya no aparecen en la zona superior de la pantalla para evitar situaciones injustas.
+Los power-ups tienen aparicion ponderada, feedback visual al recogerse y ya no aparecen en la zona superior de la pantalla para evitar situaciones injustas. Los power-ups temporales acumulan duracion si se recoge otro igual. `bombShot` y `fireShoot` son compatibles y generan disparos combinados si ambos estan activos. La curacion solo se recoge si el jugador no tiene la vida al maximo.
 
 ## Fase Final
 
-- Al alcanzar 600 puntos aparece una llave defendible en la zona inferior.
+- Al alcanzar 500 puntos aparece una llave defendible en la zona inferior.
 - Desde esa fase pueden aparecer `KEY_HUNTER`, que intentan destruir la llave.
-- Al alcanzar 1000 puntos se abre un portal y dejan de aparecer enemigos y power-ups normales.
-- Con la llave recogida, tocar el portal inicia el boss final provisional, que dispara y hace dano por contacto.
+- Al alcanzar 900 puntos se abre un portal y dejan de aparecer enemigos y power-ups normales.
+- Con la llave recogida, tocar el portal inicia el boss final provisional, que cura al jugador al maximo, dispara, hace dano por contacto y permite power-ups con menor frecuencia.
+- Si el jugador se coloca en los laterales del boss, este lanza un misil lateral dificil de esquivar para forzar una pelea frontal.
 - Al derrotar al boss, la partida termina con pantalla de victoria.
 
 ## Estructura
