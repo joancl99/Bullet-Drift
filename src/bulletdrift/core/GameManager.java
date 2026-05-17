@@ -62,8 +62,8 @@ public class GameManager extends JPanel {
         hudRenderer = new HudRenderer();
         debugHitboxes = false;
         firing = false;
-        backgroundImage = new ImageIcon("src/Files/WallPapers/Wallpaper.png").getImage();
-        bossBackgroundImage = new ImageIcon("src/Files/WallPapers/WallpaperBoss.png").getImage();
+        backgroundImage = new ImageIcon("src/files/wall-papers/wallpaper.png").getImage();
+        bossBackgroundImage = new ImageIcon("src/files/wall-papers/wallpaper-boss.png").getImage();
 
         this.addComponentListener(new ComponentAdapter() {
             @Override

@@ -22,7 +22,7 @@ public class Portal {
         int width = getScaledSize(BASE_WIDTH, scale);
         this.x = panelWidth / 2 - width / 2;
         this.y = getScaledSize(TOP_MARGIN, scale);
-        this.portalImage = new ImageIcon("src/Files/BossAcces/Portal.png").getImage();
+        this.portalImage = new ImageIcon("src/files/boss-access/portal.png").getImage();
     }
 
     public void paint(Graphics g, int panelWidth, int panelHeight) {

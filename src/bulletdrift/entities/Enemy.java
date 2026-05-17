@@ -96,17 +96,17 @@ public class Enemy {
     private String getImagePath(Type type) {
         switch (type) {
             case FAST:
-                return "src/Files/Enemies/Fast.png";
+                return "src/files/enemies/fast.png";
             case TANK:
-                return "src/Files/Enemies/Tank.png";
+                return "src/files/enemies/tank.png";
             case ZIGZAG:
-                return "src/Files/Enemies/Zigzag.png";
+                return "src/files/enemies/zigzag.png";
             case CHASER:
-                return "src/Files/Enemies/Chaser.png";
+                return "src/files/enemies/chaser.png";
             case KEY_HUNTER:
-                return "src/Files/Enemies/KeyHunter.png";
+                return "src/files/enemies/key-hunter.png";
             default:
-                return "src/Files/Enemies/Normal.png";
+                return "src/files/enemies/normal.png";
         }
     }
 

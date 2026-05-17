@@ -28,7 +28,7 @@ public class KeyObjective {
         this.x = x;
         this.y = y;
         this.health = MAX_HEALTH;
-        this.keyImage = new ImageIcon("src/Files/BossAcces/Key.png").getImage();
+        this.keyImage = new ImageIcon("src/files/boss-access/key.png").getImage();
     }
 
     public void paint(Graphics g, int panelWidth, int panelHeight) {

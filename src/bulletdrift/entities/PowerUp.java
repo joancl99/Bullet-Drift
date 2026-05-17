@@ -35,46 +35,46 @@ public class PowerUp {
 
         switch (type) {
             case TYPE_LIFE:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/ExtraLife.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/extra-life.png").getImage();
                 break;
             case TYPE_HEALING:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/Healing.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/healing.png").getImage();
                 break;
             case TYPE_SHIELD:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/Shield.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/shield.png").getImage();
                 break;
             case TYPE_RAPID_FIRE:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/RapidFire.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/rapid-fire.png").getImage();
                 break;
             case TYPE_INVULNERABILITY:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/Invulnerability.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/invulnerability.png").getImage();
                 break;
             case TYPE_SPEED:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/SuperVelocity.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/super-velocity.png").getImage();
                 break;
             case TYPE_BOMB_SHOT:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/BombShoot.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/bomb-shoot.png").getImage();
                 break;
             case TYPE_FIRE_SHOT:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/FireShoot.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/fire-shoot.png").getImage();
                 break;
             case TYPE_KEY:
-                this.powerUpImage = new ImageIcon("src/Files/BossAcces/Key.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/boss-access/key.png").getImage();
                 break;
             case TYPE_MEGA_MUSH:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/MegaMush.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/mega-mush.png").getImage();
                 break;
             case TYPE_MYSTERY_BOX:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/MysteryBox.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/mystery-box.png").getImage();
                 break;
             case TYPE_MAGNET:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/Magnet.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/magnet.png").getImage();
                 break;
             case TYPE_PADLOCK:
-                this.powerUpImage = new ImageIcon("src/Files/BossAcces/Padlock.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/boss-access/padlock.png").getImage();
                 break;
             default:
-                this.powerUpImage = new ImageIcon("src/Files/PowerUps/Invulnerability.png").getImage();
+                this.powerUpImage = new ImageIcon("src/files/power-ups/invulnerability.png").getImage();
         }
     }
 

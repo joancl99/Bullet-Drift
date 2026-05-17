@@ -42,7 +42,7 @@ public class Boss {
         this.x = panelWidth / 2 - size / 2;
         this.y = getScaledSize(TOP_MARGIN, scale);
         this.health = MAX_HEALTH;
-        this.bossImage = new ImageIcon("src/Files/Enemies/Boss.png").getImage();
+        this.bossImage = new ImageIcon("src/files/enemies/boss.png").getImage();
         this.projectiles = new ArrayList<>();
         this.direction = 1;
         this.lastShootTime = System.currentTimeMillis() + INITIAL_SHOOT_DELAY_MS - SHOOT_INTERVAL_MS;

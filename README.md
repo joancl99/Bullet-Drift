@@ -95,11 +95,11 @@ Los power-ups tienen aparicion ponderada, feedback visual al recogerse y ya no a
 ## Estructura
 
 ```text
-src/Files/BossAcces/         Sprites de llave y portal
-src/Files/Enemies/           Sprites de enemigos y boss
-src/Files/Player/            Sprites del jugador y bala normal
-src/Files/PowerUps/          Sprites de power-ups y disparos especiales
-src/Files/WallPapers/        Fondos del juego
+src/files/boss-access/        Sprites de llave y portal
+src/files/enemies/            Sprites de enemigos y boss
+src/files/player/             Sprites del jugador y bala normal
+src/files/power-ups/          Sprites de power-ups y disparos especiales
+src/files/wall-papers/        Fondos del juego
 src/bulletdrift/             Clase principal
 src/bulletdrift/core/        Coordinacion y estado principal del juego
 src/bulletdrift/entities/    Entidades jugables
