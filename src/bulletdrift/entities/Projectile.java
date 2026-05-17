@@ -8,7 +8,9 @@ public class Projectile {
         NORMAL,
         BOMB,
         FIRE,
-        BOSS
+        FIRE_BOMB,
+        BOSS,
+        SIDE_BOSS
     }
 
     private static final int BASE_SIZE = 25;
@@ -41,6 +43,10 @@ public class Projectile {
         double scaleY = panelHeight / (double) DEFAULT_PANEL_HEIGHT;
         width = (int)(BASE_SIZE * scaleX);
         height = (int)(BASE_SIZE * scaleY);
+        if (type == Type.SIDE_BOSS) {
+            width *= 2;
+            height = (int) (height * 1.25);
+        }
     }
 
     private String getImagePath(Type type) {
@@ -49,7 +55,10 @@ public class Projectile {
                 return "src/files/power-ups/bomb-shoot.png";
             case FIRE:
                 return "src/files/power-ups/fire-shoot.png";
+            case FIRE_BOMB:
+                return "src/files/power-ups/bomb-shoot.png";
             case BOSS:
+            case SIDE_BOSS:
                 return "src/files/enemies/boss-bullet.png";
             default:
                 return "src/files/player/bullet.png";
@@ -73,6 +82,10 @@ public class Projectile {
             case "down":  angle = -90;  break;
             case "left":  angle = 0; break;
             case "right": angle = 180;   break;
+            case "up-right": angle = 135; break;
+            case "down-right": angle = -135; break;
+            case "down-left": angle = -45; break;
+            case "up-left": angle = 45; break;
         }
 
         g2d.rotate(Math.toRadians(angle), centerX, centerY);

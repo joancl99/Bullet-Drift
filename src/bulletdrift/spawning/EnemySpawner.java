@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class EnemySpawner {
     private static final int BASE_MAX_ENEMIES = 8;
-    private static final int MAX_ENEMIES_LIMIT = 40;
+    private static final int MAX_ENEMIES_LIMIT = 32;
     private static final int ENEMIES_PER_WAVE = 5;
     private static final int ENEMY_SPAWN_MARGIN = 50;
     private static final int ENEMY_START_Y = -50;
@@ -18,6 +18,9 @@ public class EnemySpawner {
     private static final int BASE_ENEMY_SPAWN_CHANCE = 42;
     private static final int MIN_ENEMY_SPAWN_CHANCE = 5;
     private static final int ENEMY_SPAWN_CHANCE_REDUCTION_PER_WAVE = 6;
+    private static final int LATE_WAVE_START = 6;
+    private static final int LATE_WAVE_SPAWN_CHANCE_REDUCTION = 1;
+    private static final int LATE_WAVE_MIN_SPAWN_CHANCE = 8;
     private static final int FAST_ENEMY_START_WAVE = 1;
     private static final int FAST_ENEMY_BASE_CHANCE_PERCENT = 20;
     private static final int FAST_ENEMY_CHANCE_PER_WAVE_PERCENT = 8;
@@ -27,8 +30,10 @@ public class EnemySpawner {
     private static final int ZIGZAG_ENEMY_CHANCE_PERCENT = 16;
     private static final int ZIGZAG_ENEMY_SPEED_BONUS = 3;
     private static final int CHASER_ENEMY_START_WAVE = 4;
-    private static final int CHASER_ENEMY_CHANCE_PERCENT = 12;
-    private static final int CHASER_ENEMY_MIN_SPEED = 6;
+    private static final int CHASER_ENEMY_CHANCE_PERCENT = 7;
+    private static final int CHASER_ENEMY_MIN_SPEED = 5;
+    private static final int CHASER_ENEMY_BASE_MAX_SPEED = 7;
+    private static final int CHASER_ENEMY_SPEED_WAVE_DIVISOR = 6;
     private static final int CHASER_ENEMY_MAX_SPEED = 9;
     private static final int TANK_ENEMY_START_WAVE = 2;
     private static final int TANK_ENEMY_BASE_CHANCE_PERCENT = 12;
@@ -63,7 +68,7 @@ public class EnemySpawner {
         } else if (enemyType == Enemy.Type.ZIGZAG) {
             speed = Math.min(MAX_ENEMY_SPEED_LIMIT, speed + ZIGZAG_ENEMY_SPEED_BONUS);
         } else if (enemyType == Enemy.Type.CHASER) {
-            speed = CHASER_ENEMY_MIN_SPEED + rand.nextInt(CHASER_ENEMY_MAX_SPEED - CHASER_ENEMY_MIN_SPEED + 1);
+            speed = getChaserEnemySpeed(wave);
         } else if (enemyType == Enemy.Type.KEY_HUNTER) {
             speed = KEY_HUNTER_MIN_SPEED + rand.nextInt(KEY_HUNTER_MAX_SPEED - KEY_HUNTER_MIN_SPEED + 1);
         }
@@ -76,6 +81,11 @@ public class EnemySpawner {
     }
 
     private int getSpawnChance(int wave) {
+        if (wave >= LATE_WAVE_START) {
+            int previousWaveChance = BASE_ENEMY_SPAWN_CHANCE - (LATE_WAVE_START - 1) * ENEMY_SPAWN_CHANCE_REDUCTION_PER_WAVE;
+            int lateWaveReduction = (wave - LATE_WAVE_START + 1) * LATE_WAVE_SPAWN_CHANCE_REDUCTION;
+            return Math.max(LATE_WAVE_MIN_SPAWN_CHANCE, previousWaveChance - lateWaveReduction);
+        }
         return Math.max(MIN_ENEMY_SPAWN_CHANCE, BASE_ENEMY_SPAWN_CHANCE - wave * ENEMY_SPAWN_CHANCE_REDUCTION_PER_WAVE);
     }
 
@@ -84,6 +94,12 @@ public class EnemySpawner {
         int minSpeed = Math.min(MAX_ENEMY_SPEED_LIMIT - 1, BASE_MIN_ENEMY_SPEED + cappedWave / 3);
         int speedVariation = BASE_ENEMY_SPEED_VARIATION + cappedWave / 2;
         return Math.min(MAX_ENEMY_SPEED_LIMIT, rand.nextInt(speedVariation) + minSpeed);
+    }
+
+    private int getChaserEnemySpeed(int wave) {
+        int extraMaxSpeed = Math.max(0, (wave - CHASER_ENEMY_START_WAVE) / CHASER_ENEMY_SPEED_WAVE_DIVISOR);
+        int maxSpeed = Math.min(CHASER_ENEMY_MAX_SPEED, CHASER_ENEMY_BASE_MAX_SPEED + extraMaxSpeed);
+        return CHASER_ENEMY_MIN_SPEED + rand.nextInt(maxSpeed - CHASER_ENEMY_MIN_SPEED + 1);
     }
 
     private Enemy.Type getEnemyType(int wave, boolean keyDefendable) {

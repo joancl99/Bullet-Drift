@@ -25,8 +25,11 @@ public class Boss {
     private static final int PROJECTILE_SPAWN_OFFSET_Y = 125;
     private static final int PROJECTILE_SPEED = 12;
     private static final int HORIZONTAL_SPEED = 4;
-    private static final long SHOOT_INTERVAL_MS = 900;
-    private static final long INITIAL_SHOOT_DELAY_MS = 3000;
+    private static final long SHOOT_INTERVAL_MS = 1900;
+    private static final long INITIAL_SHOOT_DELAY_MS = 2000;
+    private static final long SIDE_MISSILE_INTERVAL_MS = 3000;
+    private static final int SIDE_MISSILE_VERTICAL_PADDING = 80;
+    private static final int SIDE_MISSILE_SPEED = 40;
 
     private int x;
     private int y;
@@ -35,6 +38,7 @@ public class Boss {
     private ArrayList<Projectile> projectiles;
     private int direction;
     private long lastShootTime;
+    private long lastSideMissileTime;
 
     public Boss(int panelWidth, int panelHeight) {
         double scale = getPanelScale(panelWidth, panelHeight);
@@ -46,6 +50,7 @@ public class Boss {
         this.projectiles = new ArrayList<>();
         this.direction = 1;
         this.lastShootTime = System.currentTimeMillis() + INITIAL_SHOOT_DELAY_MS - SHOOT_INTERVAL_MS;
+        this.lastSideMissileTime = System.currentTimeMillis();
     }
 
     public void update(int panelWidth, int panelHeight) {
@@ -118,6 +123,17 @@ public class Boss {
         return health <= 0;
     }
 
+    public boolean tryShootSideMissile(Player player, int panelWidth, int panelHeight) {
+        if (!isPlayerInSideDangerZone(player, panelWidth, panelHeight)) return false;
+
+        long now = System.currentTimeMillis();
+        if (now - lastSideMissileTime < SIDE_MISSILE_INTERVAL_MS) return false;
+
+        lastSideMissileTime = now;
+        shootSideMissile(player, panelWidth, panelHeight);
+        return true;
+    }
+
     private double getPanelScale(int panelWidth, int panelHeight) {
         double scaleX = panelWidth / (double) REFERENCE_PANEL_WIDTH;
         double scaleY = panelHeight / (double) REFERENCE_PANEL_HEIGHT;
@@ -126,6 +142,30 @@ public class Boss {
 
     private int getScaledSize(int baseSize, double scale) {
         return Math.max(1, (int) Math.round(baseSize * scale));
+    }
+
+    private boolean isPlayerInSideDangerZone(Player player, int panelWidth, int panelHeight) {
+        Rectangle bossHitbox = getHitBox(panelWidth, panelHeight);
+        int padding = getScaledSize(SIDE_MISSILE_VERTICAL_PADDING, getPanelScale(panelWidth, panelHeight));
+        int playerCenterX = player.getCenterX();
+        int playerCenterY = player.getCenterY();
+        boolean besideBoss = playerCenterX < bossHitbox.x || playerCenterX > bossHitbox.x + bossHitbox.width;
+        boolean nearBossHeight = playerCenterY >= bossHitbox.y - padding && playerCenterY <= bossHitbox.y + bossHitbox.height + padding;
+        return besideBoss && nearBossHeight;
+    }
+
+    private void shootSideMissile(Player player, int panelWidth, int panelHeight) {
+        double scale = getPanelScale(panelWidth, panelHeight);
+        int speed = getScaledSize(SIDE_MISSILE_SPEED, scale);
+        int targetX = player.getCenterX();
+        int targetY = player.getCenterY();
+        Rectangle bossHitbox = getHitBox(panelWidth, panelHeight);
+        boolean playerOnLeft = targetX < bossHitbox.x;
+        int startX = playerOnLeft ? bossHitbox.x : bossHitbox.x + bossHitbox.width;
+        int dx = playerOnLeft ? -speed : speed;
+        String direction = playerOnLeft ? "left" : "right";
+
+        projectiles.add(new Projectile(startX, targetY, dx, 0, panelWidth, panelHeight, direction, Projectile.Type.SIDE_BOSS));
     }
 
     private void shootPattern(int panelWidth, int panelHeight, int size, double scale) {

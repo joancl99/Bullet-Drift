@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class CollisionManager {
-    private static final int SCORE_PER_ENEMY = 10;
+    private static final int DEFAULT_SCORE_PER_ENEMY = 10;
+    private static final int STRONG_ENEMY_SCORE = 20;
     private static final int ENEMY_COLLISION_DAMAGE = 20;
     private static final int BOSS_PROJECTILE_DAMAGE = 20;
     private static final int BOSS_COLLISION_DAMAGE = 20;
@@ -83,17 +84,17 @@ public class CollisionManager {
 
             for (Projectile projectile : new ArrayList<>(player.getProjectiles())) {
                 if (projectile.getHitBox().intersects(enemy.getHitBoxEnemy(panelWidth, panelHeight))) {
-                    if (projectile.getType() != Projectile.Type.FIRE) {
+                    if (!isFireProjectile(projectile)) {
                         player.getProjectiles().remove(projectile);
                     }
 
-                    boolean enemyDestroyed = projectile.getType() == Projectile.Type.FIRE ? enemy.takeHit() || enemy.takeHit() : enemy.takeHit();
+                    boolean enemyDestroyed = isFireProjectile(projectile) ? enemy.takeHit() || enemy.takeHit() : enemy.takeHit();
                     if (enemyDestroyed) {
                         enemyIterator.remove();
-                        result.addScore(SCORE_PER_ENEMY);
+                        result.addScore(getScoreForEnemy(enemy));
 
-                        if (projectile.getType() == Projectile.Type.BOMB) {
-                            result.addScore(removeEnemiesInExplosion(enemies, enemy, panelWidth, panelHeight) * SCORE_PER_ENEMY);
+                        if (isBombProjectile(projectile)) {
+                            result.addScore(removeEnemiesInExplosion(enemies, enemy, panelWidth, panelHeight));
                             return result;
                         }
                     }
@@ -106,6 +107,10 @@ public class CollisionManager {
         while (powerUpIterator.hasNext()) {
             PowerUp powerUp = powerUpIterator.next();
             if (playerHitbox.intersects(powerUp.getHitBox(panelWidth, panelHeight))) {
+                if (PowerUp.TYPE_HEALING.equals(powerUp.getType()) && player.hasFullHealth()) {
+                    continue;
+                }
+
                 PowerUpSystem.PowerUpFeedback feedback;
                 if (PowerUp.TYPE_PADLOCK.equals(powerUp.getType()) && keyObjective != null) {
                     keyObjective.healHalfHealth();
@@ -135,6 +140,10 @@ public class CollisionManager {
         }
 
         if (boss != null && !boss.isDefeated()) {
+            if (boss.tryShootSideMissile(player, panelWidth, panelHeight)) {
+                result.setFeedback("MISIL LATERAL", new Color(255, 90, 90));
+            }
+
             if (playerHitbox.intersects(boss.getHitBox(panelWidth, panelHeight))) {
                 applyPlayerDamage(player, result, BOSS_COLLISION_DAMAGE, damageInvulnerabilityMs);
                 if (result.isPlayerLifeLost()) {
@@ -170,7 +179,7 @@ public class CollisionManager {
         Rectangle sourceHitbox = sourceEnemy.getHitBoxEnemy(panelWidth, panelHeight);
         int sourceX = sourceHitbox.x + sourceHitbox.width / 2;
         int sourceY = sourceHitbox.y + sourceHitbox.height / 2;
-        int removedCount = 0;
+        int score = 0;
 
         Iterator<Enemy> iterator = enemies.iterator();
         while (iterator.hasNext()) {
@@ -181,11 +190,26 @@ public class CollisionManager {
             double distance = Math.hypot(enemyX - sourceX, enemyY - sourceY);
             if (distance <= BOMB_EXPLOSION_RADIUS) {
                 iterator.remove();
-                removedCount++;
+                score += getScoreForEnemy(enemy);
             }
         }
 
-        return removedCount;
+        return score;
+    }
+
+    private boolean isFireProjectile(Projectile projectile) {
+        return projectile.getType() == Projectile.Type.FIRE || projectile.getType() == Projectile.Type.FIRE_BOMB;
+    }
+
+    private boolean isBombProjectile(Projectile projectile) {
+        return projectile.getType() == Projectile.Type.BOMB || projectile.getType() == Projectile.Type.FIRE_BOMB;
+    }
+
+    private int getScoreForEnemy(Enemy enemy) {
+        if (enemy.getType() == Enemy.Type.TANK || enemy.getType() == Enemy.Type.KEY_HUNTER) {
+            return STRONG_ENEMY_SCORE;
+        }
+        return DEFAULT_SCORE_PER_ENEMY;
     }
 
     private void applyPlayerDamage(Player player, CollisionResult result, int damage, long damageInvulnerabilityMs) {

@@ -23,6 +23,7 @@ public class Player extends JPanel {
     private static final double HITBOX_WIDTH_SCALE = 0.58;
     private static final double HITBOX_HEIGHT_SCALE = 0.70;
     private static final int PROJECTILE_SPAWN_OFFSET = 5;
+    private static final double DIAGONAL_SPEED_FACTOR = 0.70710678118;
 
     private int x, y;
     private boolean facingLeft, facingRight, facingUp, facingDown;
@@ -108,23 +109,10 @@ public class Player extends JPanel {
 
         boolean shouldDrawPlayer = !invulnerable || (System.currentTimeMillis() / 100) % 2 == 0;
         if (shouldDrawPlayer) {
-            if (facingLeft) {
-                g2d.rotate(Math.toRadians(180), centerX, centerY);
-                g2d.drawImage(playerImage, x, y, width, height, this);
-                g2d.rotate(-Math.toRadians(180), centerX, centerY);
-            } else if (facingRight) {
-                g2d.drawImage(playerImage, x, y, width, height, this);
-            } else if (facingUp) {
-                g2d.rotate(Math.toRadians(270), centerX, centerY);
-                g2d.drawImage(playerImage, x, y, width, height, this);
-                g2d.rotate(-Math.toRadians(270), centerX, centerY);
-            } else if (facingDown) {
-                g2d.rotate(Math.toRadians(90), centerX, centerY);
-                g2d.drawImage(playerImage, x, y, width, height, this);
-                g2d.rotate(-Math.toRadians(90), centerX, centerY);
-            } else {
-                g2d.drawImage(playerImage, x, y, width, height, this);
-            }
+            double angle = getFacingAngle();
+            g2d.rotate(Math.toRadians(angle), centerX, centerY);
+            g2d.drawImage(playerImage, x, y, width, height, this);
+            g2d.rotate(Math.toRadians(-angle), centerX, centerY);
         }
 
         if (shieldActive) {
@@ -163,15 +151,8 @@ public class Player extends JPanel {
         x = Math.max(0, Math.min(x, currentPanelWidth - width));
         y = Math.max(0, Math.min(y, currentPanelHeight - height));
 
-        if (!pressedKeys.isEmpty()) {
-            int lastKey = -1;
-            for (int key : pressedKeys) lastKey = key;
-            switch (lastKey) {
-                case KeyEvent.VK_W: case KeyEvent.VK_UP: setDirection(false, false, true, false); break;
-                case KeyEvent.VK_S: case KeyEvent.VK_DOWN: setDirection(false, false, false, true); break;
-                case KeyEvent.VK_A: case KeyEvent.VK_LEFT: setDirection(true, false, false, false); break;
-                case KeyEvent.VK_D: case KeyEvent.VK_RIGHT: setDirection(false, true, false, false); break;
-            }
+        if (dx != 0 || dy != 0) {
+            setDirection(dx < 0, dx > 0, dy < 0, dy > 0);
         }
 
         if (shieldActive && System.currentTimeMillis() > shieldEndTime) {
@@ -210,6 +191,17 @@ public class Player extends JPanel {
         facingRight = right;
         facingUp = up;
         facingDown = down;
+    }
+
+    private double getFacingAngle() {
+        if (facingUp && facingRight) return 315;
+        if (facingDown && facingRight) return 45;
+        if (facingDown && facingLeft) return 135;
+        if (facingUp && facingLeft) return 225;
+        if (facingLeft) return 180;
+        if (facingUp) return 270;
+        if (facingDown) return 90;
+        return 0;
     }
 
     public KeyAdapter getKeyAdapter() {
@@ -254,7 +246,19 @@ public class Player extends JPanel {
         boolean projectileCreated = true;
         Projectile.Type projectileType = getProjectileType();
 
-        if (facingUp) 
+        if (facingUp && facingRight) {
+            double diagonalSpeed = speed * DIAGONAL_SPEED_FACTOR;
+            projectiles.add(new Projectile(x + width, y, diagonalSpeed, -diagonalSpeed, currentPanelWidth, currentPanelHeight, "up-right", projectileType));
+        } else if (facingDown && facingRight) {
+            double diagonalSpeed = speed * DIAGONAL_SPEED_FACTOR;
+            projectiles.add(new Projectile(x + width, y + height, diagonalSpeed, diagonalSpeed, currentPanelWidth, currentPanelHeight, "down-right", projectileType));
+        } else if (facingDown && facingLeft) {
+            double diagonalSpeed = speed * DIAGONAL_SPEED_FACTOR;
+            projectiles.add(new Projectile(x, y + height, -diagonalSpeed, diagonalSpeed, currentPanelWidth, currentPanelHeight, "down-left", projectileType));
+        } else if (facingUp && facingLeft) {
+            double diagonalSpeed = speed * DIAGONAL_SPEED_FACTOR;
+            projectiles.add(new Projectile(x, y, -diagonalSpeed, -diagonalSpeed, currentPanelWidth, currentPanelHeight, "up-left", projectileType));
+        } else if (facingUp)
             projectiles.add(new Projectile(x + width / 2 - PROJECTILE_SPAWN_OFFSET, y, 0, -speed, currentPanelWidth, currentPanelHeight, "up", projectileType));
         else if (facingDown) 
             projectiles.add(new Projectile(x + width / 2 - PROJECTILE_SPAWN_OFFSET, y + height, 0, speed, currentPanelWidth, currentPanelHeight, "down", projectileType));
@@ -271,6 +275,7 @@ public class Player extends JPanel {
     }
 
     private Projectile.Type getProjectileType() {
+        if (bombShot && fireShot) return Projectile.Type.FIRE_BOMB;
         if (bombShot) return Projectile.Type.BOMB;
         if (fireShot) return Projectile.Type.FIRE;
         return Projectile.Type.NORMAL;
@@ -303,11 +308,15 @@ public class Player extends JPanel {
     }
 
     public int getLives() {
-        return lives;
+        return Math.max(0, lives);
+    }
+
+    public boolean hasNoLivesLeft() {
+        return lives < 0;
     }
 
     public void loseLife(int amount) {
-        lives = Math.max(0, lives - amount);
+        lives -= amount;
     }
 
     public void takeDamage(int amount) {
@@ -336,7 +345,7 @@ public class Player extends JPanel {
 
     public void activateInvulnerability(long durationMs) {
         invulnerable = true;
-        invulnerabilityEndTime = System.currentTimeMillis() + durationMs;
+        invulnerabilityEndTime = getExtendedEndTime(invulnerabilityEndTime, durationMs);
     }
 
     public boolean isInvulnerable() {
@@ -354,7 +363,7 @@ public class Player extends JPanel {
     public void activateRapidFire(long durationMs) {
         rapidFire = true;
         lastShootTime = 0;
-        rapidFireEndTime = System.currentTimeMillis() + durationMs;
+        rapidFireEndTime = getExtendedEndTime(rapidFireEndTime, durationMs);
     }
 
     public boolean isRapidFire() {
@@ -363,7 +372,7 @@ public class Player extends JPanel {
 
     public void activateSpeedBoost(long durationMs) {
         speedBoost = true;
-        speedBoostEndTime = System.currentTimeMillis() + durationMs;
+        speedBoostEndTime = getExtendedEndTime(speedBoostEndTime, durationMs);
     }
 
     public boolean isSpeedBoost() {
@@ -377,19 +386,17 @@ public class Player extends JPanel {
 
     public void activateBombShot(long durationMs) {
         bombShot = true;
-        fireShot = false;
-        bombShotEndTime = System.currentTimeMillis() + durationMs;
+        bombShotEndTime = getExtendedEndTime(bombShotEndTime, durationMs);
     }
 
     public void activateFireShot(long durationMs) {
         fireShot = true;
-        bombShot = false;
-        fireShotEndTime = System.currentTimeMillis() + durationMs;
+        fireShotEndTime = getExtendedEndTime(fireShotEndTime, durationMs);
     }
 
     public void activateMagnet(long durationMs) {
         magnetActive = true;
-        magnetEndTime = System.currentTimeMillis() + durationMs;
+        magnetEndTime = getExtendedEndTime(magnetEndTime, durationMs);
     }
 
     public boolean isMagnetActive() {
@@ -419,7 +426,7 @@ public class Player extends JPanel {
 
     public void activateShield(long durationMs) {
         shieldActive = true;
-        shieldEndTime = System.currentTimeMillis() + durationMs;
+        shieldEndTime = getExtendedEndTime(shieldEndTime, durationMs);
     }
 
     public boolean hasShield() {
@@ -488,6 +495,7 @@ public class Player extends JPanel {
         projectiles.clear();
         pressedKeys.clear();
         lastShootTime = 0;
+        heal(MAX_HEALTH);
         x = (panelWidth - width) / 2;
         y = Math.min(panelHeight - height, (int) (panelHeight * BOSS_FIGHT_START_Y_RATIO));
         setDirection(false, false, false, true);
@@ -498,5 +506,10 @@ public class Player extends JPanel {
         int currentPanelHeight = getParent() != null ? getParent().getHeight() : panelHeight;
         x = (currentPanelWidth - width) / 2;
         y = (currentPanelHeight - height) / 2;
+    }
+
+    private long getExtendedEndTime(long currentEndTime, long durationMs) {
+        long now = System.currentTimeMillis();
+        return Math.max(now, currentEndTime) + durationMs;
     }
 }

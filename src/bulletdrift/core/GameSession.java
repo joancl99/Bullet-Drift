@@ -8,8 +8,10 @@ import java.awt.Color;
 
 public class GameSession {
     private static final int POINTS_PER_WAVE = 100;
-    private static final int KEY_SPAWN_SCORE = 600;
-    private static final int PORTAL_SCORE = 1000;
+    private static final int EARLY_WAVE_POINTS = 50;
+    private static final int EARLY_WAVE_COUNT = 2;
+    private static final int KEY_SPAWN_SCORE = 500;
+    private static final int PORTAL_SCORE = 900;
     private static final int KEY_BASE_WIDTH = 44;
     private static final int KEY_BASE_HEIGHT = 64;
     private static final int KEY_BOTTOM_MARGIN = 120;
@@ -72,11 +74,19 @@ public class GameSession {
     }
 
     public int getWave() {
-        return score / POINTS_PER_WAVE;
+        int earlyWaveScoreLimit = EARLY_WAVE_POINTS * EARLY_WAVE_COUNT;
+        if (score < earlyWaveScoreLimit) {
+            return score / EARLY_WAVE_POINTS;
+        }
+        return EARLY_WAVE_COUNT + (score - earlyWaveScoreLimit) / POINTS_PER_WAVE;
     }
 
     public int getWaveStartScore() {
-        return getWave() * POINTS_PER_WAVE;
+        int wave = getWave();
+        if (wave < EARLY_WAVE_COUNT) {
+            return wave * EARLY_WAVE_POINTS;
+        }
+        return EARLY_WAVE_POINTS * EARLY_WAVE_COUNT + (wave - EARLY_WAVE_COUNT) * POINTS_PER_WAVE;
     }
 
     public boolean consumeWaveChanged() {
@@ -125,6 +135,10 @@ public class GameSession {
         return portal == null && boss == null;
     }
 
+    public boolean shouldSpawnPowerUps() {
+        return portal == null || isBossActive();
+    }
+
     public boolean hasDefendableKey() {
         return keyObjective != null && !keyCollected && portal == null;
     }
@@ -156,6 +170,11 @@ public class GameSession {
     public void collectKey() {
         keyCollected = true;
         keyObjective = null;
+    }
+
+    public void resetKeyDefense() {
+        keyObjective = null;
+        keyCollected = false;
     }
 
     public void usePortal(int panelWidth, int panelHeight) {

@@ -154,8 +154,7 @@ public class GameManager extends JPanel {
                     DAMAGE_INVULNERABILITY_MS
                 );
                 if (updateResult.isKeyDestroyed()) {
-                    session.setGameOver(true);
-                    session.showPowerUpFeedback("LLAVE DESTRUIDA", new Color(255, 80, 80));
+                    handleKeyDestroyed();
                 } else if (updateResult.isPlayerLifeLost()) {
                     handlePlayerLifeLost();
                 }
@@ -187,7 +186,7 @@ public class GameManager extends JPanel {
         int waveStartScore = session.getWaveStartScore();
         player.loseLife(1);
 
-        if (player.getLives() <= 0) {
+        if (player.hasNoLivesLeft()) {
             session.setGameOver(true);
             repaint();
             return;
@@ -200,6 +199,25 @@ public class GameManager extends JPanel {
         session.clearWaveFeedback();
         firing = false;
         session.showPowerUpFeedback("VIDA PERDIDA", new Color(255, 90, 90));
+        repaint();
+    }
+
+    private void handleKeyDestroyed() {
+        player.loseLife(1);
+
+        if (player.hasNoLivesLeft()) {
+            session.setGameOver(true);
+            session.showPowerUpFeedback("LLAVE DESTRUIDA", new Color(255, 80, 80));
+            repaint();
+            return;
+        }
+
+        enemies.clear();
+        powerUps.clear();
+        player.resetAfterLifeLost(DAMAGE_INVULNERABILITY_MS);
+        session.resetKeyDefense();
+        firing = false;
+        session.showPowerUpFeedback("LLAVE DESTRUIDA -1 VIDA", new Color(255, 90, 90));
         repaint();
     }
 

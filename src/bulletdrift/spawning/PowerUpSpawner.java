@@ -10,6 +10,8 @@ public class PowerUpSpawner {
     private static final int MAX_POWER_UPS_LIMIT = 7;
     private static final int BASE_POWER_UP_SPAWN_CHANCE = 280;
     private static final int MIN_POWER_UP_SPAWN_CHANCE = 110;
+    private static final int BOSS_FIGHT_MAX_POWER_UPS = 2;
+    private static final int BOSS_FIGHT_POWER_UP_SPAWN_CHANCE = 360;
     private static final int POWER_UP_SPAWN_CHANCE_REDUCTION_PER_WAVE = 20;
     private static final int POWER_UP_SPAWN_MARGIN = 50;
     private static final int POWER_UP_TOP_MARGIN = 220;
@@ -41,13 +43,13 @@ public class PowerUpSpawner {
         this.rand = rand;
     }
 
-    public void generatePowerUp(ArrayList<PowerUp> powerUps, int panelWidth, int panelHeight, int wave, boolean keyDefendable) {
+    public void generatePowerUp(ArrayList<PowerUp> powerUps, int panelWidth, int panelHeight, int wave, boolean keyDefendable, boolean bossFight) {
         if (panelWidth <= POWER_UP_SPAWN_MARGIN || panelHeight <= POWER_UP_TOP_MARGIN + POWER_UP_SPAWN_MARGIN) return;
 
         updatePadlockAvailability(keyDefendable);
-        if (keyDefendable && tryGeneratePadlock(powerUps, panelWidth, panelHeight)) return;
+        if (!bossFight && keyDefendable && tryGeneratePadlock(powerUps, panelWidth, panelHeight)) return;
 
-        if (powerUps.size() >= getMaxPowerUps(wave) || rand.nextInt(getSpawnChance(wave)) != 0) return;
+        if (powerUps.size() >= getMaxPowerUps(wave, bossFight) || rand.nextInt(getSpawnChance(wave, bossFight)) != 0) return;
 
         addPowerUp(powerUps, panelWidth, panelHeight, getRandomPowerUpType());
     }
@@ -85,11 +87,13 @@ public class PowerUpSpawner {
         powerUps.add(new PowerUp(x, y, type));
     }
 
-    private int getMaxPowerUps(int wave) {
+    private int getMaxPowerUps(int wave, boolean bossFight) {
+        if (bossFight) return BOSS_FIGHT_MAX_POWER_UPS;
         return Math.min(MAX_POWER_UPS_LIMIT, BASE_MAX_POWER_UPS + wave / 3);
     }
 
-    private int getSpawnChance(int wave) {
+    private int getSpawnChance(int wave, boolean bossFight) {
+        if (bossFight) return BOSS_FIGHT_POWER_UP_SPAWN_CHANCE;
         return Math.max(
             MIN_POWER_UP_SPAWN_CHANCE,
             BASE_POWER_UP_SPAWN_CHANCE - wave * POWER_UP_SPAWN_CHANCE_REDUCTION_PER_WAVE
